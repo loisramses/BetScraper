@@ -1,9 +1,7 @@
 import zendriver as zd
 import asyncio
 import json
-import re
-from rich import print
-from datetime import datetime, timedelta, timezone, date
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
 async def request_data(fetch_url: str, request_options: dict) -> dict:
@@ -16,9 +14,6 @@ def get_competitor_name(string: str, sport_entry: dict) -> str:
     string = string.replace('{$competitor1}', sport_entry['home_name'])
     string = string.replace('{$competitor2}', sport_entry['away_name'])
     return string
-
-def format_date(date):
-    return date.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
 async def get_event_data(event_id: str, semaphore: asyncio.Semaphore) -> list:
     async with semaphore:
@@ -53,7 +48,7 @@ async def get_events_data(event_ids: list) -> dict:
         sport_name = entry['sport_name']
         league_name = entry['comp_name']
         event = defaultdict(lambda: defaultdict(list))
-        match_name = entry['name']
+        match_name = entry['name'].replace('vs.', ':')
         match_url = f'{base_url}{entry['id']}'
         bets = []
         for bet in entry['markets']:
