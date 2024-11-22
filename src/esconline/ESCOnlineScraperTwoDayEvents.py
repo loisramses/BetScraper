@@ -67,17 +67,19 @@ async def get_league_data(page: zd.Tab, sport: str, data: dict = None) -> dict:
         except Exception:
             break
         
-    league_blocks_e = await page.select_all('div.bet-league')
-    for league_block in league_blocks_e:
-        league_id = league_block.attrs['id'].split('_')[-1]
-        league_name = league_block.children[0].children[1].children[0].text
-        if league_name not in data:
-            data[league_name] = []
-        for event in league_block.children[1].children:
-            event_id = event.attrs['id'].split('_')[-1]
-            event_url = f'{event_base_url}{sport.split('/')[-1]}/0/{league_id}/{event_id}'
-            data[league_name].append((event_id, event_url))
-
+    try:
+        league_blocks_e = await page.select_all('div.bet-league')
+        for league_block in league_blocks_e:
+            league_id = league_block.attrs['id'].split('_')[-1]
+            league_name = league_block.children[0].children[1].children[0].text
+            if league_name not in data:
+                data[league_name] = []
+            for event in league_block.children[1].children:
+                event_id = event.attrs['id'].split('_')[-1]
+                event_url = f'{event_base_url}{sport.split('/')[-1]}/0/{league_id}/{event_id}'
+                data[league_name].append((event_id, event_url))
+    except Exception:
+        pass
     return data
 
 async def get_sport_league_data(page: zd.Tab, sports: list) -> dict:
@@ -107,6 +109,7 @@ async def main():
             # print(f'checking {events}')
             data[sport][league] = await get_all_events_bets(events, browser)
 
+    await browser.stop()
     with open('./src/esconline/dados_apostas.json', 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False, indent=2)        
 

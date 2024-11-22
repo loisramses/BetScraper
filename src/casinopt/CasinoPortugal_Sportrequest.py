@@ -49,7 +49,7 @@ async def get_events_data(event_ids: list) -> dict:
         league_name = entry['comp_name']
         event = defaultdict(lambda: defaultdict(list))
         match_name = entry['name'].replace('vs.', ':')
-        match_url = f'{base_url}{entry['id']}'
+        match_url = f'{event_base_url}{entry['id']}'
         bets = []
         for bet in entry['markets']:
             variables = dict(item.split('=') for item in bet['specifiers'].split('&')) if bet['specifiers'] else {}
