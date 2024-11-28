@@ -10,15 +10,40 @@ async def request_data(fetch_url: str, request_options: dict) -> dict:
     """
     return await page.evaluate(script, await_promise=True)
 
+async def get_events_data(id: str, semaphore: asyncio.Semaphore):
+    async with semaphore:
+        data = await request_data(f'https://sportsbook-betting-prod.gtdevteam.work/sports/{id}/leagues/upcoming?leagueTimeFilter=10&languageId=14&isStakeGrouped=true&checkIsActive=true', request_options)
+        sport = defaultdict(lambda: defaultdict(list))
+        for league in data:
+            sport_name = league['sportName']
+            league_name = league['leagueName']
+            for game in league['games']:
+                event = defaultdict(lambda: defaultdict(list))
+                match_name = f'{game['teamA']} : {game['teamB']}'
+                match_url = f'https://www.lebull.pt/?page=/event/{game['eventId']}'
+                bets = []
+                for bet in game['stakeTypes']:
+                    bet_name = bet['stakeTypeName']
+                    options = []
+                    for option in bet['stakes']:
+                        option_name = option['stakeName']
+                        option_odd = option['betFactor']
+                        options.append((option_name, option_odd))
+                    bets.append((bet_name, options))
+                event[match_name] = defaultdict(lambda: defaultdict(list))
+                event[match_name]['url'] = match_url
+                event[match_name]['bets'] = bets
+                sport[sport_name][league_name].append(event)
+        return sport
+
 async def get_sports():
-    data = await request_data('https://sportsbook-betting-prod.gtdevteam.work/sports?languageId=14', request_options)
+    sports_data = await request_data('https://sportsbook-betting-prod.gtdevteam.work/sports?languageId=14', request_options)
     sports = defaultdict(lambda: defaultdict(list))
-    for sport in data['sports']:
-        sport_name = sport['sportName']
-        for country in sport['countries']:
-            for league in country['leagues']:
-                sports[sport_name].update({league['leagueName']: league['leagueId']}) # change this
-    print(sport_name)
+    semaphore = asyncio.Semaphore(6)
+    tasks = [get_events_data(sport['sportId'], semaphore) for sport in sports_data['sports']]
+    events_data = await asyncio.gather(*tasks)
+    for sport in events_data:
+        sports.update(sport)
     return sports
 
 async def main():
@@ -34,9 +59,8 @@ async def main():
         }
     }
     result = await get_sports()
-    print(result)
-    # with open('./src/betano/data.json', 'w', encoding='utf-8') as file:
-    #     json.dump(result, file, ensure_ascii=False, indent=2)
+    with open('./src/lebull/data.json', 'w', encoding='utf-8') as file:
+        json.dump(result, file, ensure_ascii=False, indent=2)
         
     await browser.stop()
 
