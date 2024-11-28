@@ -1,3 +1,5 @@
+import asyncio
+import json
 import zendriver as zd
 from collections import defaultdict
 from rich import print
@@ -8,16 +10,26 @@ async def request_data(fetch_url: str, request_options: dict) -> dict:
     """
     return await page.evaluate(script, await_promise=True)
 
-# TODO: CONCURRENCY
-
-async def get_league_events_and_bets(url: str):
-    data = await request_data(f'{base_api_url}{url}', {'method': 'GET'})
-    for event in data['data']['blocks'][0]['events']:
-        event_name = event['name'].replace('-', ':')
-        event_url = f'{base_url}{event['url']}'
-        
+async def get_league_events_and_bets(url: str, league_name: str,  semaphore: asyncio.Semaphore) -> dict | None:
+    async with semaphore:
+        data = await request_data(f'{base_api_url}{url}', {'method': 'GET'})
+        try:
+            if data['data']['blocks']:
+                events = []
+                for event in data['data']['blocks'][0]['events']:
+                    event_name = event['name'].replace('-', ':')
+                    event_url = f'{base_url}{event['url']}'
+                    events.append({event_name: {
+                            'url': event_url
+                        }})
+                return { league_name: events}
+            else:
+                return None
+        except Exception:
+            print(url)
 
 async def get_sports():
+    semaphore = asyncio.Semaphore(6)
     data = await request_data(
         'https://www.betano.pt/api/sport/futebol/',
         {'method': 'GET'}
@@ -30,10 +42,11 @@ async def get_sports():
             sport_name = sport['name']
             for group in response['data']['regionGroups']:
                 for region in group['regions']:
-                    for league in region['leagues']:
-                        league_name = league['name']
-                        league_url = league['url']
-                        sports[sport_name][league_name] = await get_league_events_and_bets(league_url)
+                    tasks = [get_league_events_and_bets(league['url'], league['name'], semaphore) for league in region['leagues']]
+                    all_leagues = await asyncio.gather(*tasks)
+                    for item in all_leagues:
+                        if item:
+                            sports[sport_name].update(item.items())
     return sports
 
 async def main():
@@ -46,7 +59,11 @@ async def main():
     base_url = 'https://www.betano.pt'
     base_api_url = 'https://www.betano.pt/api'
     sport_base_url = f'{base_api_url}/sport'
-    await get_sports()
+
+    result = await get_sports()
+    with open('./src/betano/data.json', 'w', encoding='utf-8') as file:
+        json.dump(result, file, ensure_ascii=False, indent=2)
+        
     await browser.stop()
 
 if __name__ == "__main__":
