@@ -10,23 +10,38 @@ async def request_data(fetch_url: str, request_options: dict) -> dict:
     """
     return await page.evaluate(script, await_promise=True)
 
+async def get_event_bets(url: str) -> list:
+    data = await request_data(f'{base_api_url}{url}', {'method': 'GET'})
+    bets = []
+    try: # avoid live events
+        for bet in data['data']['event']['markets']:
+            bet_name = bet['name']
+            options = []
+            for option in bet['selections']:
+                option_name = option['name']
+                option_odd = option['price']
+                options.append((option_name, option_odd))
+            bets.append((bet_name, options))
+    except:
+        pass
+    
+    return bets
+
 async def get_league_events_and_bets(url: str, league_name: str,  semaphore: asyncio.Semaphore) -> dict | None:
     async with semaphore:
         data = await request_data(f'{base_api_url}{url}', {'method': 'GET'})
-        try:
-            if data['data']['blocks']:
-                events = []
-                for event in data['data']['blocks'][0]['events']:
-                    event_name = event['name'].replace('-', ':')
-                    event_url = f'{base_url}{event['url']}'
-                    events.append({event_name: {
-                            'url': event_url
-                        }})
-                return { league_name: events}
-            else:
-                return None
-        except Exception:
-            print(url)
+        if data['data']['blocks']:
+            events = []
+            for event in data['data']['blocks'][0]['events']:
+                event_name = event['name'].replace('-', ':')
+                event_url = f'{base_url}{event['url']}'
+                events.append({event_name: {
+                        'url': event_url,
+                        'bets': await get_event_bets(event['url'])
+                    }})
+            return { league_name: events}
+        else:
+            return None
 
 async def get_sports():
     semaphore = asyncio.Semaphore(6)
@@ -68,3 +83,4 @@ async def main():
 
 if __name__ == "__main__":
     zd.loop().run_until_complete(main())
+    
