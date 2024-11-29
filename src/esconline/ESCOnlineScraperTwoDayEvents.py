@@ -101,12 +101,9 @@ async def main():
     page = await browser.get(base_url + "/pt/apostas/", new_tab=True)  # sports betting page
     sports = await get_all_sports(page)
     data = await get_sport_league_data(page, sports)
-    # with open('mid-data.json', 'w', encoding='utf-8') as file:
-    #     json.dump(data, file, ensure_ascii=False, indent=4)
         
     for sport, leagues in data.items():
         for league, events in leagues.items():
-            # print(f'checking {events}')
             data[sport][league] = await get_all_events_bets(events, browser)
 
     await browser.stop()

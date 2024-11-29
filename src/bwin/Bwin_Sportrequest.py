@@ -79,7 +79,7 @@ async def main():
     sports = await get_sports_data()
 
     result = await get_matches_data(sports)
-    with open('./src/bwin/data.json', 'w', encoding='utf-8') as file:
+    with open('./output/data.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":

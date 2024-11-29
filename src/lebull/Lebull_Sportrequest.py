@@ -36,7 +36,7 @@ async def get_events_data(id: str, semaphore: asyncio.Semaphore):
                 sport[sport_name][league_name].append(event)
         return sport
 
-async def get_sports():
+async def get_all_data():
     sports_data = await request_data('https://sportsbook-betting-prod.gtdevteam.work/sports?languageId=14', request_options)
     sports = defaultdict(lambda: defaultdict(list))
     semaphore = asyncio.Semaphore(6)
@@ -58,8 +58,8 @@ async def main():
             'X-Auth-Tenant-Id': '126dc7bf-288b-4f72-9536-3aa54648c0f4'
         }
     }
-    result = await get_sports()
-    with open('./src/lebull/data.json', 'w', encoding='utf-8') as file:
+    result = await get_all_data()
+    with open('./output/data.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
     await browser.stop()

@@ -94,7 +94,7 @@ async def main():
     event_ids = await get_event_ids(quantity=600, sportIds="all", days_interval=2)
  
     result = await get_events_data(event_ids)
-    with open('./src/casinopt/data.json', 'w', encoding='utf-8') as file:
+    with open('./output/data.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
     await browser.stop()
