@@ -27,6 +27,8 @@ async def get_events_data(id: str, semaphore: asyncio.Semaphore):
                     options = []
                     for option in bet['stakes']:
                         option_name = option['stakeName']
+                        if option['stakeArgument']:
+                            option_name += f' {str(option['stakeArgument'])}'
                         option_odd = option['betFactor']
                         options.append((option_name, option_odd))
                     bets.append((bet_name, options))
@@ -59,7 +61,7 @@ async def main():
         }
     }
     result = await get_all_data()
-    with open('./output/data.json', 'w', encoding='utf-8') as file:
+    with open('./output/lebull_data.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
     await browser.stop()

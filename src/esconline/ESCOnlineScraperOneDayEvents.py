@@ -1,7 +1,3 @@
-# TODO: also append league names and match names to the bets
-# ver se vale a pena continuar com os tuplos ou mudar pra dict (modo json)
-# precisa de uma revisão muito grande
-
 import nodriver as uc
 from rich import print
 import time

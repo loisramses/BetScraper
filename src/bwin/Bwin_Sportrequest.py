@@ -16,10 +16,10 @@ def format_date(date):
 
 async def get_matches_data(sports_list: list) -> dict:
     currentDate = datetime.now(timezone.utc)
-    oneHourLater = format_date(currentDate + timedelta(hours=5))
+    oneHourLater = format_date(currentDate + timedelta(days=2))
     currentDate = format_date(currentDate)
     ids_string = ",".join(str(sport[1]) for sport in sports_list)
-    quantity = 30
+    quantity = 3000
     
     data = await request_data(f'https://sports.bwin.pt/cds-api/bettingoffer/fixtures?x-bwin-accessid=YmQwNTFkNDAtNzM3Yi00YWIyLThkNDYtYWFmNGY2N2Y1OWIx&lang=pt&country=PT&sportIds={ids_string}&take={quantity}&sortBy=FixtureStage&from={currentDate}&to={oneHourLater}&offerMapping=All',
                               {'method': 'GET',
@@ -79,7 +79,7 @@ async def main():
     sports = await get_sports_data()
 
     result = await get_matches_data(sports)
-    with open('./output/data.json', 'w', encoding='utf-8') as file:
+    with open('./output/bwin_data.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":

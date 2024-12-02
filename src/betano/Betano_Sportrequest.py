@@ -76,11 +76,12 @@ async def main():
     sport_base_url = f'{base_api_url}/sport'
 
     result = await get_sports()
-    with open('./output/data.json', 'w', encoding='utf-8') as file:
+    with open('./output/betano_data.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
     await browser.stop()
 
 if __name__ == "__main__":
     zd.loop().run_until_complete(main())
-    
+
+# TODO: rever as threads, está muito lento a fazer as chamadas de todos os eventos sequencialmente
