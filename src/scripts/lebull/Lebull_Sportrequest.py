@@ -12,8 +12,10 @@ async def request_data(fetch_url: str, request_options: dict) -> dict:
 
 async def get_events_data(id: str, semaphore: asyncio.Semaphore):
     async with semaphore:
-        data = await request_data(f'https://sportsbook-betting-prod.gtdevteam.work/sports/{id}/leagues/upcoming?leagueTimeFilter=10&languageId=14&isStakeGrouped=true&checkIsActive=true', request_options)
+        data = await request_data(f'https://sportsbook-betting-prod.gtdevteam.work/sports/{id}/leagues/upcoming?leagueTimeFilter=14&languageId=14&isStakeGrouped=true&checkIsActive=true', request_options)
         sport = defaultdict(lambda: defaultdict(list))
+        if not data:
+            return sport
         for league in data:
             sport_name = league['sportName']
             league_name = league['leagueName']
@@ -61,7 +63,7 @@ async def main():
         }
     }
     result = await get_all_data()
-    with open('./output/lebull_data.json', 'w', encoding='utf-8') as file:
+    with open('./src/output/lebull_data.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
     await browser.stop()
