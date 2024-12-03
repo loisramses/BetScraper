@@ -14,7 +14,7 @@ async def get_event_bets(event: dict, semaphore: asyncio.Semaphore) -> dict:
     async with semaphore:
         data = await request_data(f'{base_api_url}{event['url']}', {'method': 'GET'})
         bets = []
-        event_name = event['name'].replace('-', ':')
+        event_name = event['name'].replace(' - ', ' : ')
         event_url = f'{base_url}{event['url']}'
         try: # avoid live events
             for bet in data['data']['event']['markets']:
@@ -24,6 +24,12 @@ async def get_event_bets(event: dict, semaphore: asyncio.Semaphore) -> dict:
                     option_name = option['name']
                     option_odd = option['price']
                     options.append((option_name, option_odd))
+                if 'tableLayout' in bet:
+                    for group_selection in bet['tableLayout']['rows']:
+                        for option in group_selection['groupSelections'][0]['selections']:
+                            option_name = option['name']
+                            option_odd = option['price']
+                            options.append((option_name, option_odd))
                 bets.append((bet_name, options))
         except:
             pass
@@ -87,3 +93,5 @@ async def main():
 
 if __name__ == "__main__":
     zd.loop().run_until_complete(main())
+
+# PROBLEM WITH BASKETBALL BETS

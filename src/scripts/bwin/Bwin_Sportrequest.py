@@ -33,7 +33,7 @@ async def get_matches_data(sports_list: list) -> dict:
         league_name = entry['competition']['name']['value']
 
         event = defaultdict(lambda: defaultdict(list))
-        match_name = entry['name']['value'].replace(" - ", " : ")
+        match_name = entry['name']['value'].replace(' - ', ' : ')
         event_name_url = '-'.join(re.sub(pattern, '', match_name.lower()).split())
         match_url = f'{event_base_url}{event_name_url}-{entry['id']}/?market=-1'
         bets = []

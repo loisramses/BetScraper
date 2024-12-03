@@ -28,8 +28,8 @@ async def main():
         for competition_e in competitions_e:
             competitions.append(
                 (
-                    competition_e.attrs["href"],
-                    competition_e.text.split(" - ")[-1].strip(),
+                    competition_e.attrs['href'],
+                    competition_e.text.split(' - ')[-1].strip(),
                 )
             )
     print(f'size: {len(competitions)}, {competitions}')
