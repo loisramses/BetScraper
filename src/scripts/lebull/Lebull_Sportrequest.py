@@ -63,7 +63,7 @@ async def main():
         }
     }
     result = await get_all_data()
-    with open('./src/output/lebull_data.json', 'w', encoding='utf-8') as file:
+    with open('./src/output/Lebull.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
     await browser.stop()
