@@ -28,37 +28,37 @@ def init_db(conn: sqlite3.Connection):
     CREATE TABLE IF NOT EXISTS sports(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         sport_name TEXT UNIQUE NOT NULL
-    )
+    );
     """)
     
     # INSERT ALLOWED_SPORTS
     cursor.executemany("""
     INSERT INTO sports (sport_name) 
     VALUES (?)
-    ON CONFLICT (sport_name) DO NOTHING
+    ON CONFLICT (sport_name) DO NOTHING;
     """, [(sport,) for sport in allowed_sports])
 
     # LEAGUES
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS leagues(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        league_name TEXT NOT NULL,
+        name TEXT NOT NULL,
         sport_id INTEGER NOT NULL,
         FOREIGN KEY (sport_id) REFERENCES sports (id)
-    )
+    );
     """)
 
     # MATCHES
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS matches(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        match_name TEXT NOT NULL,
+        name TEXT NOT NULL,
         participant1 TEXT NOT NULL,
         participant2 TEXT NOT NULL,
-        url TEXT NOT NULL,
+        url TEXT UNIQUE NOT NULL,
         league_id INTEGER NOT NULL,
         FOREIGN KEY (league_id) REFERENCES leagues (id)
-    )
+    );
     """)
 
     # BET_TYPES
@@ -66,14 +66,14 @@ def init_db(conn: sqlite3.Connection):
     CREATE TABLE IF NOT EXISTS bet_types(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         bet_type TEXT UNIQUE NOT NULL
-    )
+    );
     """)
 
     # INSERT BET_TYPES
     cursor.executemany("""
     INSERT INTO bet_types (bet_type) 
     VALUES (?)
-    ON CONFLICT (bet_type) DO NOTHING
+    ON CONFLICT (bet_type) DO NOTHING;
     """, [(bet_type.value,) for bet_type in BetTypes])
 
     # BETS
@@ -84,7 +84,7 @@ def init_db(conn: sqlite3.Connection):
         bet_type_id INTEGER NOT NULL,
         FOREIGN KEY (match_id) REFERENCES matches (id)
         FOREIGN KEY (bet_type_id) REFERENCES bet_types (id)
-    )
+    );
     """)
 
     # OPTION_TYPES
@@ -92,14 +92,14 @@ def init_db(conn: sqlite3.Connection):
     CREATE TABLE IF NOT EXISTS option_types(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         option_type TEXT UNIQUE NOT NULL
-    )
+    );
     """)
 
     # INSERT OPTION_TYPES
     cursor.executemany("""
     INSERT INTO option_types (option_type) 
     VALUES (?)
-    ON CONFLICT (option_type) DO NOTHING
+    ON CONFLICT (option_type) DO NOTHING;
     """, [(option_type.value,) for option_type in OptionTypes])
 
     # OPTIONS
@@ -113,7 +113,7 @@ def init_db(conn: sqlite3.Connection):
         bet_id INTEGER NOT NULL,
         FOREIGN KEY (bet_id) REFERENCES bets (id)
         FOREIGN KEY (option_type_id) REFERENCES option_typeS (id)
-    )
+    );
     """)
     
     # OPORTUNITIES
@@ -125,7 +125,7 @@ def init_db(conn: sqlite3.Connection):
         advantage FLOAT NOT NULL,
         FOREIGN KEY (first_option_id) REFERENCES options (id)
         FOREIGN KEY (second_option_id) REFERENCES options (id)
-    )
+    );
     """)        
     conn.commit()
 
@@ -133,24 +133,42 @@ def init_db(conn: sqlite3.Connection):
 #     cursor.execute("""
 #     """)
 
-def get_or_insert_league(cursor: sqlite3.Cursor, league: str):
+def insert_league(cursor: sqlite3.Cursor, league_name: str, sport_id: int) -> int:
     cursor.execute("""
-    """)
+    INSERT INTO leagues (name, sport_id)
+    VALUES (?, ?)
+    RETURNING *;
+    """, (league_name, sport_id))
+    return cursor.fetchone()[0]
 
-def get_or_insert_league(conn: sqlite3.Connection):
-    pass
+def insert_match(cursor: sqlite3.Cursor, match_name: str, participant1: str, participant2: str, url: str, league_id: int) -> int:
+    cursor.execute("""
+    INSERT INTO matches (name, participant1, participant2, url, league_id)
+    VALUES (?, ?, ?, ?, ?)
+    RETURNING *;
+    """, (match_name, participant1, participant2, url, league_id))
+    return cursor.fetchone()[0]
 
-def get_or_insert_matche(conn: sqlite3.Connection):
-    pass
+def insert_bet(cursor: sqlite3.Cursor, match_id: int, bet_type_id: int):
+    cursor.execute("""
+    INSERT INTO bets (match_id, bet_type_id)
+    VALUES (?, ?)
+    RETURNING *;
+    """, (match_id, bet_type_id))
+    return cursor.fetchone()[0]
 
-def get_or_insert_bet_type(conn: sqlite3.Connection):
-    pass
+def insert_option(cursor: sqlite3.Cursor, name: int, odd: float, option_type_id: int, bet_id: int, arg: float = None):
+    cursor.execute("""
+    INSERT INTO options (name, arg, odd, option_type_id, bet_id)
+    VALUES (?, ?, ?, ?, ?)
+    RETURNING *;
+    """, (name, arg, odd, option_type_id, bet_id))
+    return cursor.fetchone()[0]
 
-def get_or_insert_bet(conn: sqlite3.Connection):
-    pass
-
-def get_or_insert_option_type(conn: sqlite3.Connection):
-    pass
-
-def get_or_insert_option(conn: sqlite3.Connection):
-    pass
+def insert_oportunity(cursor: sqlite3.Cursor, second_option_id: int, first_option_id: int, advantage: int):
+    cursor.execute("""
+    INSERT INTO oportunities (second_option_id, first_option_id, advantage)
+    VALUES (?, ?, ?)
+    RETURNING *;
+    """, (second_option_id, first_option_id, advantage))
+    return cursor.fetchone()[0]

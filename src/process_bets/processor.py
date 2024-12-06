@@ -3,22 +3,8 @@ import os
 import re
 from rich import print
 from collections import defaultdict
-from utils.maps import *
-
-# def load_data(file_paths):
-#     consolidated_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(list))))
-    
-#     for file_path in file_paths:
-#         with open(file_path, 'r') as f:
-#             data = json.load(f)
-#             for sport, leagues in data.items():
-#                 for league, matches in leagues.items():
-#                     for match in matches:
-#                         for match_name, match_data in match.items():
-#                             for bet_type, bets in match_data['bets']:
-#                                 consolidated_data[sport][league][match_name][bet_type].extend(bets)
-    
-#     return consolidated_data
+from utils.maps import bet_type_mapping
+from utils.standards import selection_standardization
 
 def load_data(file_paths):
     resulting_data = []
@@ -26,19 +12,20 @@ def load_data(file_paths):
     for file_path in file_paths:
         with open(file_path, 'r') as f:
             data = json.load(f)
-            for _, leagues in data.items():
-                for _, matches in leagues.items():
+            for sport_name, leagues in data.items():
+                for league_name, matches in leagues.items():
                     for match in matches:
-                        for _, match_data in match.items():
+                        for match_name, match_data in match.items():
                             for bet_type, bet_selections in match_data['bets']:
                                 if bet_type in bet_type_mapping:
+                                    print(bet_type_mapping[bet_type].value)
                                     for selection in bet_selections:
                                         selection[0] = selection[0].replace(',', '.')
                                         if re.search('mais', selection[0], re.IGNORECASE):
-                                            selection[0] = selection_normalization['more'] + re.search(pattern, selection[0])[0]
+                                            selection[0] = selection_standardization['more'] + re.search(pattern, selection[0])[0]
                                         elif re.search('menos', selection[0], re.IGNORECASE):
-                                            selection[0] = selection_normalization['less'] + re.search(pattern, selection[0])[0]
-                                    resulting_data.append(bet_selections)
+                                            selection[0] = selection_standardization['less'] + re.search(pattern, selection[0])[0]
+                                    resulting_data.append(match_data)
     return resulting_data
 
 folder_path = 'src/output'
