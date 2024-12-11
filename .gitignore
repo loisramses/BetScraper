@@ -1,5 +1,5 @@
 venv
 src/**/*.json
-**/__pycache__/
+src/utils/__pycache__
 src/output
 *.db

@@ -39,14 +39,14 @@ def init_db(conn: sqlite3.Connection):
     """, [(sport,) for sport in allowed_sports])
 
     # LEAGUES
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS leagues(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        sport_id INTEGER NOT NULL,
-        FOREIGN KEY (sport_id) REFERENCES sports (id)
-    );
-    """)
+    # cursor.execute("""
+    # CREATE TABLE IF NOT EXISTS leagues(
+    #     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #     name TEXT NOT NULL,
+    #     sport_id INTEGER NOT NULL,
+    #     FOREIGN KEY (sport_id) REFERENCES sports (id)
+    # );
+    # """)
 
     # MATCHES
     cursor.execute("""
@@ -56,8 +56,20 @@ def init_db(conn: sqlite3.Connection):
         participant1 TEXT NOT NULL,
         participant2 TEXT NOT NULL,
         url TEXT UNIQUE NOT NULL,
-        league_id INTEGER NOT NULL,
-        FOREIGN KEY (league_id) REFERENCES leagues (id)
+        sport_id INTEGER NOT NULL,
+        FOREIGN KEY (sport_id) REFERENCES sports (id)
+    );
+    """)
+
+    # PAIRS
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS pairs(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        match1_id INTEGER NOT NULL,
+        match2_id INTEGER NOT NULL,
+        trust_factor FLOAT NOT NULL,
+        FOREIGN KEY (match1_id) REFERENCES matches (id),
+        FOREIGN KEY (match2_id) REFERENCES matches (id)
     );
     """)
 
@@ -133,23 +145,31 @@ def init_db(conn: sqlite3.Connection):
 #     cursor.execute("""
 #     """)
 
-def insert_league(cursor: sqlite3.Cursor, league_name: str, sport_id: int) -> int:
-    cursor.execute("""
-    INSERT INTO leagues (name, sport_id)
-    VALUES (?, ?)
-    RETURNING *;
-    """, (league_name, sport_id))
-    return cursor.fetchone()[0]
+# def insert_league(cursor: sqlite3.Cursor, league_name: str, sport_id: int) -> int:
+#     cursor.execute("""
+#     INSERT INTO leagues (name, sport_id)
+#     VALUES (?, ?)
+#     RETURNING *;
+#     """, (league_name, sport_id))
+#     return cursor.fetchone()[0]
 
-def insert_match(cursor: sqlite3.Cursor, match_name: str, participant1: str, participant2: str, url: str, league_id: int) -> int:
+def insert_match(cursor: sqlite3.Cursor, match_name: str, participant1: str, participant2: str, url: str, sport_id: int) -> int | None:
     cursor.execute("""
-    INSERT INTO matches (name, participant1, participant2, url, league_id)
+    INSERT INTO matches (name, participant1, participant2, url, sport_id)
     VALUES (?, ?, ?, ?, ?)
     RETURNING *;
-    """, (match_name, participant1, participant2, url, league_id))
+    """, (match_name, participant1, participant2, url, sport_id))
     return cursor.fetchone()[0]
 
-def insert_bet(cursor: sqlite3.Cursor, match_id: int, bet_type_id: int):
+def insert_pair(cursor: sqlite3.Cursor, match1_id: int, match2_id: int, trust_factor: float) -> int | None:
+    cursor.execute("""
+    INSERT INTO pairs (match1_id, match2_id, trust_factor)
+    VALUES (?, ?, ?)
+    RETURNING *;
+    """, (match1_id, match2_id, trust_factor))
+    return cursor.fetchone()[0]
+
+def insert_bet(cursor: sqlite3.Cursor, match_id: int, bet_type_id: int) -> int | None:
     cursor.execute("""
     INSERT INTO bets (match_id, bet_type_id)
     VALUES (?, ?)
@@ -157,7 +177,7 @@ def insert_bet(cursor: sqlite3.Cursor, match_id: int, bet_type_id: int):
     """, (match_id, bet_type_id))
     return cursor.fetchone()[0]
 
-def insert_option(cursor: sqlite3.Cursor, name: str, odd: float, option_type_id: int, bet_id: int, arg: float = None):
+def insert_option(cursor: sqlite3.Cursor, name: str, odd: float, option_type_id: int, bet_id: int, arg: float = None) -> int | None:
     cursor.execute("""
     INSERT INTO options (name, arg, odd, option_type_id, bet_id)
     VALUES (?, ?, ?, ?, ?)
@@ -165,7 +185,7 @@ def insert_option(cursor: sqlite3.Cursor, name: str, odd: float, option_type_id:
     """, (name, arg, odd, option_type_id, bet_id))
     return cursor.fetchone()[0]
 
-def insert_oportunity(cursor: sqlite3.Cursor, second_option_id: int, first_option_id: int, advantage: int):
+def insert_oportunity(cursor: sqlite3.Cursor, second_option_id: int, first_option_id: int, advantage: int) -> int | None:
     cursor.execute("""
     INSERT INTO oportunities (second_option_id, first_option_id, advantage)
     VALUES (?, ?, ?)
@@ -173,7 +193,7 @@ def insert_oportunity(cursor: sqlite3.Cursor, second_option_id: int, first_optio
     """, (second_option_id, first_option_id, advantage))
     return cursor.fetchone()[0]
 
-def get_sport(cursor: sqlite3.Cursor, sport_name: str) -> int:
+def get_sport_by_name(cursor: sqlite3.Cursor, sport_name: str) -> int | None:
     cursor.execute("""
     SELECT id FROM sports
     WHERE name = ?;
@@ -181,10 +201,57 @@ def get_sport(cursor: sqlite3.Cursor, sport_name: str) -> int:
     result = cursor.fetchone()
     return result[0] if result else None
 
-def get_option_type(cursor: sqlite3.Cursor, option_type: str) -> int:
+def get_all_sports(cursor: sqlite3.Cursor, columns: str = "id") -> list | None:
+    cursor.execute(f"""
+    SELECT {columns} FROM sports;
+    """)
+    result = cursor.fetchall()
+    return result if result else None
+
+def get_all_matches(cursor: sqlite3.Cursor, columns: str = "id") -> list | None:
+    cursor.execute(f"""
+    SELECT {columns} FROM matches;
+    """)
+    result = cursor.fetchall()
+    return result if result else None
+
+def get_match_by_id(cursor: sqlite3.Cursor, columns: str, match_id: int) -> str | None:
+    cursor.execute(f"""
+    SELECT {columns} FROM matches
+    WHERE ID = ?;
+    """, (match_id,))
+    result = cursor.fetchone()
+    return result if result else None
+
+def get_all_pairs(cursor: sqlite3.Cursor, columns: str = "id") -> list | None:
+    cursor.execute(f"""
+    SELECT {columns} FROM pairs;
+    """)
+    result = cursor.fetchall()
+    return result if result else None
+
+def get_option_type_by_option_type(cursor: sqlite3.Cursor, option_type: str) -> list | None:
     cursor.execute("""
     SELECT id FROM option_types
     WHERE option_type = ?;
     """, (option_type,))
     result = cursor.fetchone()
     return result[0] if result else None
+
+def get_options_by_match_id(cursor: sqlite3.Cursor, match_id: int) -> list | None:
+    cursor.execute(f"""
+    SELECT
+        bet.bet_type_id AS bet_type_id,
+        option.name AS option_name,
+        option.arg AS option_arg,
+        option.odd AS option_odd,
+        op_t.option_type AS option_type_name,
+        option.bet_id AS option_bet_id
+    FROM options option
+    JOIN option_types op_t ON option.option_type_id = op_t.id
+    JOIN bets bet ON option.bet_id = bet.id
+    JOIN matches match ON bet.match_id = match.id
+    WHERE match.id = ?
+    """, (match_id,))
+    result = cursor.fetchall()
+    return result if result else None

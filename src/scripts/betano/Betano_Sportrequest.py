@@ -45,7 +45,7 @@ async def get_event_bets(event: dict, semaphore: asyncio.Semaphore) -> dict:
 async def get_league_events_and_bets(url: str, league_name: str,  semaphore: asyncio.Semaphore) -> dict | None:
     async with semaphore:
         data = await request_data(f'{base_api_url}{url}', {'method': 'GET'})
-        if data['data']['blocks']:
+        if data['data'] and data['data']['blocks']:
             sema = asyncio.Semaphore(3)
             tasks = [get_event_bets(event, sema) for event in data['data']['blocks'][0]['events']]
             all_events = await asyncio.gather(*tasks)
