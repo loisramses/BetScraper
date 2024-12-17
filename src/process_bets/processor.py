@@ -56,12 +56,14 @@ def insert_data(conn: sqlite3.Connection):
 
 def build_pairs(conn: sqlite3.Connection):
     cursor = conn.cursor()
-    all_matches = get_all_matches(cursor, "id, name")
+    all_matches = get_all_matches(cursor, "id, name, participant1, participant2")
     for a, b in itertools.combinations(all_matches, 2):
-        id_a, match_name_a = a
-        id_b, match_name_b = b
-        ratio = fuzz.ratio(match_name_a, match_name_b, processor=utils.default_process) + fuzz.token_set_ratio(match_name_a, match_name_b, processor=utils.default_process)
-        if ratio >= 140:
+        id_a, match_name_a, part1_a, part2_a = a
+        id_b, match_name_b, part1_b, part2_b = b
+        sort_ratio = fuzz.ratio(match_name_a, match_name_b)
+        parts_ratio = (fuzz.token_ratio(part1_a, part1_b) + fuzz.token_ratio(part2_a, part2_b)) / 2
+        ratio = (parts_ratio + sort_ratio) / 2
+        if ratio >= 60:
             insert_pair(cursor, id_a, id_b, ratio)
     conn.commit()
             

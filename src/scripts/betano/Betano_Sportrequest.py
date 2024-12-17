@@ -1,6 +1,6 @@
 import asyncio
 import json
-import zendriver as zd
+import nodriver as uc
 from collections import defaultdict
 from rich import print
 
@@ -17,6 +17,7 @@ async def get_event_bets(event: dict, semaphore: asyncio.Semaphore) -> dict:
         event_name = event['name'].replace(' - ', ' : ')
         event_url = f'{base_url}{event['url']}'
         try: # avoid live events
+            
             for bet in data['data']['event']['markets']:
                 bet_name = bet['name']
                 options = []
@@ -45,13 +46,16 @@ async def get_event_bets(event: dict, semaphore: asyncio.Semaphore) -> dict:
 async def get_league_events_and_bets(url: str, league_name: str,  semaphore: asyncio.Semaphore) -> dict | None:
     async with semaphore:
         data = await request_data(f'{base_api_url}{url}', {'method': 'GET'})
-        if data['data'] and data['data']['blocks']:
-            sema = asyncio.Semaphore(3)
-            tasks = [get_event_bets(event, sema) for event in data['data']['blocks'][0]['events']]
-            all_events = await asyncio.gather(*tasks)
-            return { league_name: all_events}
-        else:
-            return None
+        try:
+            if data['data']['blocks']:
+                sema = asyncio.Semaphore(3)
+                tasks = [get_event_bets(event, sema) for event in data['data']['blocks'][0]['events']]
+                all_events = await asyncio.gather(*tasks)
+                return { league_name: all_events}
+            else:
+                return None
+        except Exception:
+            pass
 
 async def get_sports():
     semaphore = asyncio.Semaphore(2)
@@ -79,7 +83,7 @@ async def main():
     global base_api_url
     global sport_base_url
     global page
-    browser = await zd.start()
+    browser = await uc.start()
     page = await browser.get('about:blank')
     base_url = 'https://www.betano.pt'
     base_api_url = 'https://www.betano.pt/api'
@@ -89,9 +93,9 @@ async def main():
     with open('./src/output/Betano.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
-    await browser.stop()
+    browser.stop()
 
 if __name__ == "__main__":
-    zd.loop().run_until_complete(main())
+    uc.loop().run_until_complete(main())
 
 # PROBLEM WITH BASKETBALL BETS

@@ -1,4 +1,4 @@
-import zendriver as zd
+import nodriver as uc
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
@@ -85,7 +85,7 @@ async def main():
     global event_base_url
     global base_url
     global page
-    browser = await zd.start()
+    browser = await uc.start()
     page = await browser.get('about:blank')
     event_base_url = 'https://www.casinoportugal.pt/desportos/mercados/'
     base_url = 'https://odds.casinoportugal.pt/redis/fixtures?'
@@ -97,7 +97,7 @@ async def main():
     with open('./src/output/CasinoPT.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
-    await browser.stop()
+    browser.stop()
 
 if __name__ == "__main__":
-    zd.loop().run_until_complete(main())
+    uc.loop().run_until_complete(main())

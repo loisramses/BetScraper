@@ -1,4 +1,4 @@
-import zendriver as zd
+import nodriver as uc
 import json
 import re
 from rich import print
@@ -58,7 +58,7 @@ async def get_sports_data() -> list:
 async def main():
     # global event_base_url
     global page
-    browser = await zd.start()
+    browser = await uc.start()
     page = await browser.get('about:blank')
     # event_base_url = 'https://sports.bwin.pt/pt/sports/eventos/'
     sports = await get_sports_data()
@@ -84,4 +84,4 @@ async def main():
     #     json.dump(result, file, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
-    zd.loop().run_until_complete(main())
+    uc.loop().run_until_complete(main())

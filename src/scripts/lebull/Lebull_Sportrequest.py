@@ -1,7 +1,9 @@
 import asyncio
 import json
-import zendriver as zd
+import nodriver as uc
+import nodriver as uc
 from collections import defaultdict
+from utils.maps import allowed_sports
 from rich import print
 
 async def request_data(fetch_url: str, request_options: dict) -> dict:
@@ -21,7 +23,11 @@ async def get_events_data(id: str, semaphore: asyncio.Semaphore):
             league_name = league['leagueName']
             for game in league['games']:
                 event = defaultdict(lambda: defaultdict(list))
-                match_name = f'{game['teamA']} : {game['teamB']}'
+                if (sport_name == allowed_sports[1] or sport_name == allowed_sports[4]) and game['eventComment'] == 'Equipa Casa - Equipa Visitante':
+                    match_name = f'{game['teamB']} : {game['teamA']}'
+                else:
+                    match_name = f'{game['teamA']} : {game['teamB']}'
+                # match_name = f'{game['teamA']} : {game['teamB']}'
                 match_url = f'https://www.lebull.pt/?page=/event/{game['eventId']}'
                 bets = []
                 for bet in game['stakeTypes']:
@@ -53,7 +59,7 @@ async def get_all_data():
 async def main():
     global page
     global request_options
-    browser = await zd.start()
+    browser = await uc.start(headless=True)
     page = await browser.get('about:blank')
 
     request_options = {
@@ -66,8 +72,8 @@ async def main():
     with open('./src/output/Lebull.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
-    await browser.stop()
+    browser.stop()
 
 if __name__ == "__main__":
-    zd.loop().run_until_complete(main())
+    uc.loop().run_until_complete(main())
     

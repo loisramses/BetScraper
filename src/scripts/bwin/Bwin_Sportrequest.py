@@ -81,6 +81,8 @@ async def main():
     result = await get_matches_data(sports)
     with open('./src/output/Bwin.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
+        
+    browser.stop()
 
 if __name__ == "__main__":
     uc.loop().run_until_complete(main())
