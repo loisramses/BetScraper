@@ -90,7 +90,7 @@ async def main():
     sport_base_url = f'{base_api_url}/sport'
 
     result = await get_sports()
-    with open('./src/output/Betano.json', 'w', encoding='utf-8') as file:
+    with open('output/Betano.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
     browser.stop()

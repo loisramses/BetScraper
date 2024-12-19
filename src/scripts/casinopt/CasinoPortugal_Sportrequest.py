@@ -91,10 +91,10 @@ async def main():
     base_url = 'https://odds.casinoportugal.pt/redis/fixtures?'
     # quando for pra meter apenas um ou dois desportos lembrar de meter '%2C' (que significa ',' em ASCII) entre
     # cada desporto
-    event_ids = await get_event_ids(quantity=600, sportIds="all", days_interval=2)
+    event_ids = await get_event_ids(quantity=2000, sportIds="all", days_interval=4)
  
     result = await get_events_data(event_ids)
-    with open('./src/output/CasinoPT.json', 'w', encoding='utf-8') as file:
+    with open('output/CasinoPT.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
     browser.stop()

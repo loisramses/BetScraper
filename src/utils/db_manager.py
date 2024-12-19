@@ -1,5 +1,5 @@
 import sqlite3
-from utils.maps import allowed_sports
+from utils.maps import allowed_sports, allowed_bookmakers
 from utils.my_types import BetTypes, OptionTypes
 
 def get_connection(db_path: str):
@@ -14,14 +14,19 @@ def init_db(conn: sqlite3.Connection):
     cursor = conn.cursor()
 
     # BOOKMAKERS
-    # cursor.execute("""
-    # CREATE TABLE IF NOT EXISTS bookmakers(
-    #     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #     bookmaker_name TEXT UNIQUE NOT NULL
-    # )
-    # """)
-        # bookmaker_id INTEGER NOT NULL,
-        # FOREIGN KEY (bookmaker_id) REFERENCES bookmakers (id)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS bookmakers(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE NOT NULL
+    )
+    """)
+
+    # INSERT ALLOWED_BOOKMAKERS
+    cursor.executemany("""
+    INSERT INTO bookmakers (name) 
+    VALUES (?)
+    ON CONFLICT (name) DO NOTHING;
+    """, [(bookmaker,) for bookmaker in allowed_bookmakers])
 
     # SPORTS
     cursor.execute("""
@@ -57,7 +62,9 @@ def init_db(conn: sqlite3.Connection):
         participant2 TEXT NOT NULL,
         url TEXT UNIQUE NOT NULL,
         sport_id INTEGER NOT NULL,
+        bookmaker_id INTEGER NOT NULL,
         FOREIGN KEY (sport_id) REFERENCES sports (id)
+        FOREIGN KEY (bookmaker_id) REFERENCES bookmakers (id)
     );
     """)
 
@@ -135,10 +142,24 @@ def init_db(conn: sqlite3.Connection):
         first_option_id INTEGER NOT NULL,
         second_option_id INTEGER NOT NULL,
         advantage FLOAT NOT NULL,
+        pair_id INTEGER NOT NULL,
         FOREIGN KEY (first_option_id) REFERENCES options (id)
         FOREIGN KEY (second_option_id) REFERENCES options (id)
+        FOREIGN KEY (pair_id) REFERENCES pairs (id)
     );
     """)        
+    conn.commit()
+
+def clean_up_db(conn: sqlite3.Connection):
+    cursor = conn.cursor()
+    cursor.executescript("""
+    DELETE FROM matches;
+    DELETE FROM bets;
+    DELETE FROM options;
+    DELETE FROM pairs;
+    DELETE FROM oportunities;
+    VACUUM;
+    """)
     conn.commit()
 
 # def get_or_insert_bookmaker(cursor: sqlite3.Cursor, bookmaker: str):
@@ -153,12 +174,12 @@ def init_db(conn: sqlite3.Connection):
 #     """, (league_name, sport_id))
 #     return cursor.fetchone()[0]
 
-def insert_match(cursor: sqlite3.Cursor, match_name: str, participant1: str, participant2: str, url: str, sport_id: int) -> int | None:
+def insert_match(cursor: sqlite3.Cursor, match_name: str, participant1: str, participant2: str, url: str, sport_id: int, bookmaker_id: int) -> int | None:
     cursor.execute("""
-    INSERT INTO matches (name, participant1, participant2, url, sport_id)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO matches (name, participant1, participant2, url, sport_id, bookmaker_id)
+    VALUES (?, ?, ?, ?, ?, ?)
     RETURNING *;
-    """, (match_name, participant1, participant2, url, sport_id))
+    """, (match_name, participant1, participant2, url, sport_id, bookmaker_id))
     return cursor.fetchone()[0]
 
 def insert_pair(cursor: sqlite3.Cursor, match1_id: int, match2_id: int, trust_factor: float) -> int | None:
@@ -185,13 +206,21 @@ def insert_option(cursor: sqlite3.Cursor, name: str, odd: float, option_type_id:
     """, (name, arg, odd, option_type_id, bet_id))
     return cursor.fetchone()[0]
 
-def insert_oportunity(cursor: sqlite3.Cursor, second_option_id: int, first_option_id: int, advantage: int) -> int | None:
+def insert_oportunity(cursor: sqlite3.Cursor, first_option_id: int, second_option_id: int, advantage: int, pair_id: int) -> int | None:
     cursor.execute("""
-    INSERT INTO oportunities (second_option_id, first_option_id, advantage)
-    VALUES (?, ?, ?)
+    INSERT INTO oportunities (first_option_id, second_option_id, advantage, pair_id)
+    VALUES (?, ?, ?, ?)
     RETURNING *;
-    """, (second_option_id, first_option_id, advantage))
+    """, (first_option_id, second_option_id, advantage, pair_id))
     return cursor.fetchone()[0]
+
+def get_bookmaker_by_name(cursor: sqlite3.Cursor, bookmaker_name: str) -> int | None:
+    cursor.execute("""
+    SELECT id FROM bookmakers
+    WHERE name = ?
+    """, (bookmaker_name,))
+    result = cursor.fetchone()
+    return result[0] if result else None
 
 def get_sport_by_name(cursor: sqlite3.Cursor, sport_name: str) -> int | None:
     cursor.execute("""
@@ -230,6 +259,21 @@ def get_all_pairs(cursor: sqlite3.Cursor, columns: str = "id") -> list | None:
     result = cursor.fetchall()
     return result if result else None
 
+def get_oportunities(cursor: sqlite3.Cursor, columns: str = "id", condition: str = "TRUE") -> list | None:
+    cursor.execute(f"""
+    SELECT {columns}
+    FROM oportunities
+    WHERE
+    """)
+
+def get_bet_type_by_bet_type(cursor: sqlite3.Cursor, bet_type: str) -> list | None:
+    cursor.execute("""
+    SELECT id FROM bet_types
+    WHERE bet_type = ?;
+    """, (bet_type,))
+    result = cursor.fetchone()
+    return result[0] if result else None
+
 def get_option_type_by_option_type(cursor: sqlite3.Cursor, option_type: str) -> list | None:
     cursor.execute("""
     SELECT id FROM option_types
@@ -241,14 +285,14 @@ def get_option_type_by_option_type(cursor: sqlite3.Cursor, option_type: str) -> 
 def get_options_by_match_id(cursor: sqlite3.Cursor, match_id: int) -> list | None:
     cursor.execute(f"""
     SELECT
-        bet.bet_type_id AS bet_type_id,
-        option.name AS option_name,
+        option.id AS option_id,
+        op_t.option_type AS option_type_name,
         option.arg AS option_arg,
         option.odd AS option_odd,
-        op_t.option_type AS option_type_name,
-        option.bet_id AS option_bet_id
+        bet_t.bet_type AS bet_type_name
     FROM options option
     JOIN option_types op_t ON option.option_type_id = op_t.id
+    JOIN bet_types bet_t ON bet.bet_type_id = bet_t.id
     JOIN bets bet ON option.bet_id = bet.id
     JOIN matches match ON bet.match_id = match.id
     WHERE match.id = ?

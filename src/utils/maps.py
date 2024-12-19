@@ -38,3 +38,4 @@ oposing_bets = {
 }
 
 allowed_sports = ['Futebol', 'Basquetebol', 'Voleibol', 'Ténis', 'Futebol Americano', 'Andebol']
+allowed_bookmakers = ['Betano', 'Bwin', 'CasinoPT', 'Lebull']

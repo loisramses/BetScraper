@@ -107,7 +107,7 @@ async def main():
             data[sport][league] = await get_all_events_bets(events, browser)
 
     await browser.stop()
-    with open('./src/esconline/dados_apostas.json', 'w', encoding='utf-8') as file:
+    with open('esconline/dados_apostas.json', 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False, indent=2)        
 
 if __name__ == "__main__":

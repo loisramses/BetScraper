@@ -1,7 +1,6 @@
 import asyncio
 import json
 import nodriver as uc
-import nodriver as uc
 from collections import defaultdict
 from utils.maps import allowed_sports
 from rich import print
@@ -59,7 +58,7 @@ async def get_all_data():
 async def main():
     global page
     global request_options
-    browser = await uc.start(headless=True)
+    browser = await uc.start()
     page = await browser.get('about:blank')
 
     request_options = {
@@ -69,7 +68,7 @@ async def main():
         }
     }
     result = await get_all_data()
-    with open('./src/output/Lebull.json', 'w', encoding='utf-8') as file:
+    with open('output/Lebull.json', 'w', encoding='utf-8') as file:
         json.dump(result, file, ensure_ascii=False, indent=2)
         
     browser.stop()

@@ -36,7 +36,7 @@ async def main():
     result = await request_data('https://ws.goldenpark.pt/component/datatree', request_options)
     await browser.wait(30)
     print(result)
-    # with open('./src/lebull/data.json', 'w', encoding='utf-8') as file:
+    # with open('lebull/data.json', 'w', encoding='utf-8') as file:
     #     json.dump(result, file, ensure_ascii=False, indent=2)
         
     await browser.stop()
