@@ -1,6 +1,7 @@
 import asyncio
 import json
-import nodriver as uc
+# import nodriver as uc
+import zendriver
 from collections import defaultdict
 from utils.maps import allowed_sports
 from rich import print
@@ -58,7 +59,7 @@ async def get_all_data():
 async def main():
     global page
     global request_options
-    browser = await uc.start()
+    browser = await zendriver.start(browser_executable_path="/usr/bin/chromium-browser", headless=True, sandbox=True)
     page = await browser.get('about:blank')
 
     request_options = {
@@ -74,5 +75,5 @@ async def main():
     browser.stop()
 
 if __name__ == "__main__":
-    uc.loop().run_until_complete(main())
+    asyncio.run(main())
     

@@ -96,7 +96,8 @@ def build_oportunities(conn: sqlite3.Connection):
                     insert_oportunity(cursor, option_id_a, option_id_b, advantage, pair_id)
     conn.commit()
 
-
+def expose_bets():
+    pass
 
 conn = get_connection('../database.db')
 init_db(conn)

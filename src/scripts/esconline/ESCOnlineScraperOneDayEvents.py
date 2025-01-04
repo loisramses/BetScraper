@@ -1,25 +1,27 @@
-import nodriver as uc
+# import nodriver as uc
+import zendriver
 from rich import print
 import time
+import asyncio
 # url for the games is https://www.estorilsolcasinos.pt/pt/apostas/event/{sportId}/0/{leagueId}/{matchId}
 
-async def get_all_sports(page: uc.Tab) -> list:
+async def get_all_sports(page: zendriver.Tab) -> list:
     sports_e = await page.select_all('li.Sports')
     return [e.children[0].children[0].text for e in sports_e]
 
-async def get_option(element: uc.Element) -> tuple[str, str]:
+async def get_option(element: zendriver.Element) -> tuple[str, str]:
     option_name = element.children[0].text
     option_odd = element.children[1].text
     return (option_name, option_odd)
 
-async def get_all_options(element: uc.Element):
+async def get_all_options(element: zendriver.Element):
     options = []
     for col in element.children:
         for child in col.children:
             options.append(await get_option(child))
     return options
 
-async def get_all_bets(page: uc.Tab):
+async def get_all_bets(page: zendriver.Tab):
     bets = []
     all_bets_e = await page.select_all('div[id^="MarketId"]')
     for bet in all_bets_e:
@@ -29,7 +31,8 @@ async def get_all_bets(page: uc.Tab):
 
 async def main():
     base_url = "https://www.estorilsolcasinos.pt"
-    browser = await uc.start()
+    # browser = await zendriver.start()
+    browser = await zendriver.start(headless=True)
     page = await browser.get(base_url + "/pt/apostas/proximos-eventos")  # sports betting page
     await page.maximize()
     time.sleep(0.8)
@@ -60,4 +63,4 @@ async def main():
         event_ids.append((sport, ids))
 
 if __name__ == "__main__":
-    uc.loop().run_until_complete(main())
+    asyncio.run(main())

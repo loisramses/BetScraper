@@ -1,4 +1,6 @@
-import nodriver as uc
+# import nodriver as uc
+import zendriver
+import asyncio
 import json
 import re
 from rich import print
@@ -58,7 +60,8 @@ async def get_sports_data() -> list:
 async def main():
     # global event_base_url
     global page
-    browser = await uc.start()
+    # browser = await zendriver.start()
+    browser = await zendriver.start(headless=True)
     page = await browser.get('about:blank')
     # event_base_url = 'https://sports.bwin.pt/pt/sports/eventos/'
     sports = await get_sports_data()
@@ -84,4 +87,4 @@ async def main():
     #     json.dump(result, file, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
-    uc.loop().run_until_complete(main())
+    asyncio.run(main())

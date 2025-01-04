@@ -1,6 +1,7 @@
 import asyncio
 import json
-import nodriver as uc
+# import nodriver as uc
+import zendriver
 from collections import defaultdict
 from rich import print
 
@@ -83,7 +84,8 @@ async def main():
     global base_api_url
     global sport_base_url
     global page
-    browser = await uc.start()
+    # browser = await zendriver.start()
+    browser = await zendriver.start(headless=True)
     page = await browser.get('about:blank')
     base_url = 'https://www.betano.pt'
     base_api_url = 'https://www.betano.pt/api'
@@ -96,6 +98,6 @@ async def main():
     browser.stop()
 
 if __name__ == "__main__":
-    uc.loop().run_until_complete(main())
+    asyncio.run(main())
 
 # PROBLEM WITH BASKETBALL BETS

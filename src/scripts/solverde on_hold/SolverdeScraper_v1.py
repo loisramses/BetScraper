@@ -1,11 +1,12 @@
 import json
 import timeit
-import nodriver as uc
+# import nodriver as uc
+import zendriver
 from rich import print
 import asyncio
 # url for the games is https://www.estorilsolcasinos.pt/pt/apostas/event/{sportId}/0/{leagueId}/{matchId}
 
-async def get_all_sports(page: uc.Tab) -> list:
+async def get_all_sports(page: zendriver.Tab) -> list:
     # sports_e = await page.select_all('a[href^="/apostas/sports/"]')
     sports_e = await page.select_all('a.ta-SportItem')
     sports = []
@@ -20,19 +21,19 @@ async def get_all_sports(page: uc.Tab) -> list:
     return sports
     # return [(e.children[1].text, e['href']) for e in sports_e]
 
-async def get_option(element: uc.Element) -> tuple[str, str]:
+async def get_option(element: zendriver.Element) -> tuple[str, str]:
     option_name = element.children[0].text
     option_odd = element.children[1].text
     return (option_name, option_odd)
 
-async def get_all_options(element: uc.Element):
+async def get_all_options(element: zendriver.Element):
     options = []
     for col in element.children:
         for child in col.children:
             options.append(await get_option(child))
     return options
 
-async def get_all_bets(page: uc.Tab):
+async def get_all_bets(page: zendriver.Tab):
     event = {}
     await (await page.select('.filters__list', timeout=20)).children[1].click()
     event_name = (await page.select('.breadcrumb')).children[1].children[-2].children[-2].text
@@ -46,7 +47,7 @@ async def get_all_bets(page: uc.Tab):
         event[event_name]['bets'].append((bet_name, await get_all_options(bet.children[1])))
     return event
 
-async def get_event_bets(url: str, browser: uc.Browser, semaphore: asyncio.Semaphore) -> list:
+async def get_event_bets(url: str, browser: zendriver.Browser, semaphore: asyncio.Semaphore) -> list:
     async with semaphore:    
         page = await browser.get(url, new_window=True)
         bets = None
@@ -57,7 +58,7 @@ async def get_event_bets(url: str, browser: uc.Browser, semaphore: asyncio.Semap
         await page.close()
         return bets
 
-async def get_all_events_bets(events: list, browser: uc.Browser) -> list:
+async def get_all_events_bets(events: list, browser: zendriver.Browser) -> list:
     semaphore = asyncio.Semaphore(3)
     tasks = [get_event_bets(event[1], browser, semaphore) for event in events]
     all_bets = await asyncio.gather(*tasks)
@@ -68,7 +69,7 @@ async def get_all_events_bets(events: list, browser: uc.Browser) -> list:
             flattened_bets.append(bets)
     return flattened_bets
 
-async def get_league_data(page: uc.Tab) -> dict:
+async def get_league_data(page: zendriver.Tab) -> dict:
     data = {}
     try:
         await open_dropdown(page, '.ta-EventListGroup')
@@ -86,7 +87,7 @@ async def get_league_data(page: uc.Tab) -> dict:
             data[league_name].append((event_id, event_url))
     return data
 
-async def get_sport_league_data(sport: tuple[str, str], browser: uc.Browser, semaphore: asyncio.Semaphore) -> dict:
+async def get_sport_league_data(sport: tuple[str, str], browser: zendriver.Browser, semaphore: asyncio.Semaphore) -> dict:
     async with semaphore:
         data = {}
         full_url = f'{base_url}{sport[1]}/matches/48h'
@@ -95,7 +96,7 @@ async def get_sport_league_data(sport: tuple[str, str], browser: uc.Browser, sem
         await page.close()
         return data
 
-async def get_all_sport_league_data(browser: uc.Browser, sports: list) -> dict:
+async def get_all_sport_league_data(browser: zendriver.Browser, sports: list) -> dict:
     semaphore = asyncio.Semaphore(3)
     tasks = [get_sport_league_data(sport, browser, semaphore) for sport in sports]
     all_data = await asyncio.gather(*tasks)
@@ -104,7 +105,7 @@ async def get_all_sport_league_data(browser: uc.Browser, sports: list) -> dict:
         flattened_data.update(data.items())
     return flattened_data
     
-async def open_dropdown(page: uc.Tab, selector: str):
+async def open_dropdown(page: zendriver.Tab, selector: str):
     tabs = await page.select_all(selector, timeout=20)
     for tab in tabs:
         if tab.child_node_count == 1:
@@ -114,7 +115,8 @@ async def open_dropdown(page: uc.Tab, selector: str):
 async def main():
     global base_url
     base_url = "https://www.solverde.pt"
-    browser = await uc.start()
+    # browser = await zendriver.start()
+    browser = await zendriver.start(headless=True)
     page = await browser.get(base_url + "/apostas", new_tab=True)
     sports = await get_all_sports(page)
     data = await get_all_sport_league_data(page, sports[:1])
@@ -136,6 +138,6 @@ async def main():
     #     json.dump(data, file, ensure_ascii=False, indent=4)        
 
 if __name__ == "__main__":
-    # duration = timeit.timeit(lambda: uc.loop().run_until_complete(main()), number=1)
+    # duration = timeit.timeit(lambda: asyncio.run(main()), number=1)
     # print(duration)
-    uc.loop().run_until_complete(main())
+    asyncio.run(main())

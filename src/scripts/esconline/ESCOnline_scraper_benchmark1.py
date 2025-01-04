@@ -1,11 +1,14 @@
-import nodriver as uc
+# import nodriver as uc
+import zendriver
 import time  # Importando a biblioteca time para medir o tempo
+import asyncio
 
 # url for the games is https://www.estorilsolcasinos.pt/pt/apostas/event/{sportId}/0/{leagueId}/matchId
 
 async def main():
     base_url = "https://www.estorilsolcasinos.pt"
-    browser = await uc.start()
+    # browser = await zendriver.start()
+    browser = await zendriver.start(headless=True)
     page = await browser.get(base_url + "/pt/apostas")  # sports betting page
 
     await (
@@ -37,6 +40,6 @@ async def main():
 
 if __name__ == "__main__":
     start_time = time.time()  # Marcar o tempo de início
-    uc.loop().run_until_complete(main())
+    asyncio.run(main())
     end_time = time.time()  # Marcar o tempo de término
     print(f'Tempo total de execução: {end_time - start_time:.2f} segundos')

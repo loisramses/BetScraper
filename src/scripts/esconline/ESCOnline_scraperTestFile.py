@@ -1,20 +1,21 @@
-import nodriver as uc
+# import nodriver as uc
+import zendriver
 from rich import print
 import asyncio
 
-async def get_option(element: uc.Element) -> tuple[str, str]:
+async def get_option(element: zendriver.Element) -> tuple[str, str]:
     option_name = element.children[0].text
     option_odd = element.children[1].text
     return (option_name, option_odd)
 
-async def get_all_options(element: uc.Element):
+async def get_all_options(element: zendriver.Element):
     options = []
     for col in element.children:
         for child in col.children:
             options.append(await get_option(child))
     return options
 
-async def get_all_bets(page: uc.Tab):
+async def get_all_bets(page: zendriver.Tab):
     event = {}
     await (await page.select('.filters__list', timeout=20)).children[1].click()
     event_name = (await page.select('.breadcrumb')).children[1].children[-2].children[-2].text
@@ -28,7 +29,7 @@ async def get_all_bets(page: uc.Tab):
         event[event_name]['bets'].append((bet_name, await get_all_options(bet.children[1])))
     return event
 
-async def get_event_bets(url: str, browser: uc.Browser, semaphore: asyncio.Semaphore) -> list:
+async def get_event_bets(url: str, browser: zendriver.Browser, semaphore: asyncio.Semaphore) -> list:
     async with semaphore:    
         page = await browser.get(url, new_window=True)
         bets = await get_all_bets(page)
@@ -36,7 +37,7 @@ async def get_event_bets(url: str, browser: uc.Browser, semaphore: asyncio.Semap
         return bets
 
 async def get_all_events_bets(events: list) -> list:
-    browser = await uc.start(browser_args=['--start-maximized'])
+    browser = await zendriver.start(browser_args=['--start-maximized'])
     semaphore = asyncio.Semaphore(2)
     tasks = [get_event_bets(event[1], browser, semaphore) for event in events]
     all_bets = await asyncio.gather(*tasks)

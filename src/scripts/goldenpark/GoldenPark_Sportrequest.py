@@ -2,7 +2,8 @@
 
 import asyncio
 import json
-import nodriver as uc
+# import nodriver as uc
+import zendriver
 from collections import defaultdict
 from rich import print
 
@@ -15,7 +16,8 @@ async def request_data(fetch_url: str, request_options: dict) -> dict:
 async def main():
     global page
     global request_options
-    browser = await uc.start()
+    # browser = await zendriver.start()
+    browser = await zendriver.start(headless=True)
     page = await browser.get('https://apostas.goldenpark.pt/')
 
     request_options = {
@@ -42,4 +44,4 @@ async def main():
     await browser.stop()
 
 if __name__ == "__main__":
-    uc.loop().run_until_complete(main())
+    asyncio.run(main())

@@ -1,8 +1,3 @@
-google-chrome &
-sleep 5
-pkill -x "chrome"
-sleep 5
-
 # echo "Removing database"
 # rm -f ../database.db || { echo "Error deleting DB"; exit 1;}
 

@@ -1,5 +1,7 @@
+*.db
 venv
+src/output
+chat_id.txt
+bot_token.txt
 src/**/*.json
 src/utils/__pycache__
-src/output
-*.db

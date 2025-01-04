@@ -1,4 +1,5 @@
-import nodriver as uc
+# import nodriver as uc
+import zendriver
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
@@ -85,7 +86,8 @@ async def main():
     global event_base_url
     global base_url
     global page
-    browser = await uc.start()
+    # browser = await zendriver.start()
+    browser = await zendriver.start(headless=True)
     page = await browser.get('about:blank')
     event_base_url = 'https://www.casinoportugal.pt/desportos/mercados/'
     base_url = 'https://odds.casinoportugal.pt/redis/fixtures?'
@@ -100,4 +102,4 @@ async def main():
     browser.stop()
 
 if __name__ == "__main__":
-    uc.loop().run_until_complete(main())
+    asyncio.run(main())
