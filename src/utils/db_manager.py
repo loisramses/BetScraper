@@ -299,3 +299,29 @@ def get_options_by_match_id(cursor: sqlite3.Cursor, match_id: int) -> list | Non
     """, (match_id,))
     result = cursor.fetchall()
     return result if result else None
+
+def get_oportunities_for_export(cursor: sqlite3.Cursor) -> list | None:
+    cursor.execute("""
+    SELECT 
+        m1.name AS match_name,
+        m1.url AS match1_url,
+        m2.url AS match2_url,
+        bt.bet_type AS bet_type_name,
+        opt1.name AS first_option_name,
+        opt1.odd AS first_option_odd,
+        opt2.name AS second_option_name,
+        opt2.odd AS second_option_odd,
+        o.advantage,
+        p.trust_factor
+    FROM oportunities o
+    JOIN options opt1 ON o.first_option_id = opt1.id
+    JOIN options opt2 ON o.second_option_id = opt2.id
+    JOIN bets b ON opt1.bet_id = b.id
+    JOIN bet_types bt ON b.bet_type_id = bt.id
+    JOIN pairs p ON o.pair_id = p.id
+    JOIN matches m1 ON p.match1_id = m1.id
+    JOIN matches m2 ON p.match2_id = m2.id
+    WHERE o.advantage > 0 AND o.advantage < 15 AND p.trust_factor > 80;
+    """)
+    result = cursor.fetchall()
+    return result if result else None

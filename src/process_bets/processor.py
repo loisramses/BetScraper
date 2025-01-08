@@ -1,4 +1,5 @@
 import itertools
+import requests
 import json
 import os
 import re
@@ -96,8 +97,30 @@ def build_oportunities(conn: sqlite3.Connection):
                     insert_oportunity(cursor, option_id_a, option_id_b, advantage, pair_id)
     conn.commit()
 
-def expose_bets():
-    pass
+def send_message(oportunity):
+    match_name, url1, url2, bet_type, option1, odd1, option2, odd2, advantage, trust_factor = oportunity
+    bot_token = os.getenv("BOT_TOKEN")
+    chat_id = os.getenv("CHAT_ID")
+    message = f"""
+    *Oportunidade*
+    *{match_name.replace("(", "\\(").replace(")", "\\)")}*
+    *Tipo de aposta:* {bet_type}
+    *1ª opção:* [{option1.replace("(", "\\(").replace(")", "\\)")}]({url1}) *Odd:* {str(odd1).replace(".", "\\.")}
+    *2ª opção:* [{option2.replace("(", "\\(").replace(")", "\\)")}]({url2}) *Odd:* {str(odd2).replace(".", "\\.")}
+    *Percentagem:* {str(advantage).replace(".", "\\.")}
+    *Taxa de confiança:* {str(trust_factor).replace(".", "\\.")}
+    """
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": message, "parse_mode": "MarkdownV2", "link_preview_options": {"is_disabled": True}}
+    response = requests.post(url, json=payload)
+    print(response._content)
+
+def expose_bets(conn: sqlite3.Connection):
+    cursor = conn.cursor()
+    all_oportunities = get_oportunities_for_export(cursor)
+    if not all_oportunities: return
+    for oportunity in all_oportunities:
+        send_message(oportunity)
 
 conn = get_connection('../database.db')
 init_db(conn)
@@ -105,4 +128,5 @@ clean_up_db(conn)
 insert_data(conn)
 build_pairs(conn)
 build_oportunities(conn)
+expose_bets(conn)
 close_connection(conn)
