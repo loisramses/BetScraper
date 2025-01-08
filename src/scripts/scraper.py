@@ -1,20 +1,20 @@
 import zendriver as zd
 import asyncio
 import logging
-from scripts.casinopt import CasinoPortugal_Sportrequest
-from scripts.lebull import Lebull_Sportrequest
-from scripts.betano import Betano_Sportrequest
-from scripts.bwin import Bwin_Sportrequest
+from scripts.casinopt.CasinoPortugal_Sportrequest import CasinoPT_Request
+from scripts.lebull.Lebull_Sportrequest import Lebull_Request
+from scripts.betano.Betano_Sportrequest import Betano_Request
+from scripts.bwin.Bwin_Sportrequest import Bwin_Request
 
 async def main():
     logging.basicConfig(filename="logs/log.log", filemode='a', format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
     browser = await zd.start()
     page = await browser.get('about:blank')
     
-    casino = CasinoPortugal_Sportrequest.CasinoPT_Request(page)
-    betano = Betano_Sportrequest.Betano_Request(page)
-    lebull = Lebull_Sportrequest.Lebull_Request(page)
-    bwin = Bwin_Sportrequest.Bwin_Request(page)
+    casino = CasinoPT_Request(page)
+    betano = Betano_Request(page)
+    lebull = Lebull_Request(page)
+    bwin = Bwin_Request(page)
 
     try:
         await lebull.run()
