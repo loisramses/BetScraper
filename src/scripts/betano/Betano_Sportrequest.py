@@ -82,5 +82,5 @@ class Betano_Request:
 
     async def run(self):
         result = await self.get_sports()
-        with open('output/Betano.json', 'w', encoding='utf-8') as file:
-            json.dump(result, file, ensure_ascii=False, indent=2)
+        # with open('output/Betano.json', 'w', encoding='utf-8') as file:
+        #     json.dump(result, file, ensure_ascii=False, indent=2)

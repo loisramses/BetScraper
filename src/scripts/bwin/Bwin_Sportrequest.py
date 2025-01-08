@@ -72,5 +72,5 @@ class Bwin_Request:
     async def run(self):
         sports = await self.get_sports_data()
         result = await self.get_matches_data(sports)
-        with open('output/Bwin.json', 'w', encoding='utf-8') as file:
-            json.dump(result, file, ensure_ascii=False, indent=2)
+        # with open('output/Bwin.json', 'w', encoding='utf-8') as file:
+        #     json.dump(result, file, ensure_ascii=False, indent=2)

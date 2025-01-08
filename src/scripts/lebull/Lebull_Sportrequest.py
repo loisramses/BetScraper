@@ -61,6 +61,6 @@ class Lebull_Request:
 
     async def run(self):
         result = await self.get_all_data()
-        with open('output/Lebull.json', 'w', encoding='utf-8') as file:
-            json.dump(result, file, ensure_ascii=False, indent=2)
+        # with open('output/Lebull.json', 'w', encoding='utf-8') as file:
+        #     json.dump(result, file, ensure_ascii=False, indent=2)
     

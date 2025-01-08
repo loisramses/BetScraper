@@ -90,5 +90,5 @@ class CasinoPT_Request():
         event_ids = await self.get_event_ids(quantity=2000, sportIds="all", days_interval=4)
     
         result = await self.get_events_data(event_ids)
-        with open('output/CasinoPT.json', 'w', encoding='utf-8') as file:
-            json.dump(result, file, ensure_ascii=False, indent=2)
+        # with open('output/CasinoPT.json', 'w', encoding='utf-8') as file:
+        #     json.dump(result, file, ensure_ascii=False, indent=2)
