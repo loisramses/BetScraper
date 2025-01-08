@@ -1,6 +1,7 @@
 *.db
 logs
 venv
+.vscode
 src/output
 chat_id.txt
 bot_token.txt

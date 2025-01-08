@@ -1,6 +1,6 @@
 import sqlite3
-from utils.maps import allowed_sports, allowed_bookmakers
-from utils.my_types import BetTypes, OptionTypes
+from src.utils.maps import allowed_sports, allowed_bookmakers
+from src.utils.my_types import BetTypes, OptionTypes
 
 def get_connection(db_path: str):
     """Establishes a connection to the database."""

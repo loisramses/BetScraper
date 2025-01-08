@@ -1,10 +1,10 @@
 import zendriver as zd
 import asyncio
 import logging
-from scripts.casinopt.CasinoPortugal_Sportrequest import CasinoPT_Request
-from scripts.lebull.Lebull_Sportrequest import Lebull_Request
-from scripts.betano.Betano_Sportrequest import Betano_Request
-from scripts.bwin.Bwin_Sportrequest import Bwin_Request
+from casinopt.CasinoPortugal_Sportrequest import CasinoPT_Request
+from lebull.Lebull_Sportrequest import Lebull_Request
+from betano.Betano_Sportrequest import Betano_Request
+from bwin.Bwin_Sportrequest import Bwin_Request
 
 async def main():
     logging.basicConfig(filename="logs/log.log", filemode='a', format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)

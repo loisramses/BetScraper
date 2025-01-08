@@ -6,10 +6,10 @@ import os
 import re
 from rapidfuzz import fuzz
 from rapidfuzz.utils import default_process
-from utils.db_manager import *
-from utils.standards import *
-from utils.my_types import *
-from utils.maps import *
+from src.utils.db_manager import *
+from src.utils.standards import *
+from src.utils.my_types import *
+from src.utils.maps import *
 from rich import print
 
 def calculate_advantage(odd1: float, odd2: float) -> float:
@@ -123,6 +123,7 @@ def send_message(oportunity):
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {"chat_id": chat_id, "text": message, "parse_mode": "MarkdownV2", "link_preview_options": {"is_disabled": True}}
     response = requests.post(url, json=payload)
+    print(oportunity)
     print(response._content)
 
 def expose_bets(conn: sqlite3.Connection):
@@ -134,14 +135,14 @@ def expose_bets(conn: sqlite3.Connection):
 
 conn = get_connection('../database.db')
 logging.basicConfig(filename="logs/log.log", filemode='a', format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
-init_db(conn)
-clean_up_db(conn)
-logging.info("Inserting data into DB")
-insert_data(conn)
-logging.info("Building pairs")
-build_pairs(conn)
-logging.info("Building opportunities")
-build_opportunities(conn)
+# init_db(conn)
+# clean_up_db(conn)
+# logging.info("Inserting data into DB")
+# insert_data(conn)
+# logging.info("Building pairs")
+# build_pairs(conn)
+# logging.info("Building opportunities")
+# build_opportunities(conn)
 logging.info("Exposing Bets")
 expose_bets(conn)
 close_connection(conn)
