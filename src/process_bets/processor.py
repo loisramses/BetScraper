@@ -6,10 +6,10 @@ import os
 import re
 from rapidfuzz import fuzz
 from rapidfuzz.utils import default_process
-from src.utils.db_manager import *
-from src.utils.standards import *
-from src.utils.my_types import *
-from src.utils.maps import *
+from utils.db_manager import *
+from utils.standards import *
+from utils.my_types import *
+from utils.maps import *
 from rich import print
 
 def calculate_advantage(odd1: float, odd2: float) -> float:

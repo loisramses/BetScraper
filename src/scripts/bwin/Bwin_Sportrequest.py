@@ -2,7 +2,7 @@ import zendriver
 import json
 import re
 from datetime import datetime, timedelta, timezone
-from src.utils.helper import request_data
+from utils.helper import request_data
 from collections import defaultdict
 
 class Bwin_Request:

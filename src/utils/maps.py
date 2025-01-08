@@ -1,4 +1,4 @@
-from src.utils.my_types import BetTypes, OptionTypes
+from utils.my_types import BetTypes, OptionTypes
        
 bet_type_mapping = {
     'Ambas Equipas Marcam': BetTypes.BOTH_TEAMS_SCORE,
