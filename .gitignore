@@ -2,8 +2,7 @@
 logs
 venv
 src/output
-src/**/__pycache__
 chat_id.txt
 bot_token.txt
 src/**/*.json
-src/utils/__pycache__
+src/**/__pycache__
