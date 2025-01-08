@@ -7,7 +7,7 @@ from scripts.betano import Betano_Sportrequest
 from scripts.bwin import Bwin_Sportrequest
 
 async def main():
-    logging.basicConfig(filename="logs/log.log", filemode='a', format="%(asctime)s - %(levelname)s - %(message)s")
+    logging.basicConfig(filename="logs/log.log", filemode='a', format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
     browser = await zd.start()
     page = await browser.get('about:blank')
     
@@ -20,23 +20,28 @@ async def main():
         await lebull.run()
     except Exception:
         logging.exception("Lebull")
+    logging.info("Lebull finished scraping")
         
     try:
         await casino.run()
     except Exception:
         logging.exception("Casino")
+    logging.info("CasinoPT finished scraping")
         
     try:
         await bwin.run()
     except Exception:
         logging.exception("Bwin")
+    logging.info("Bwin finished scraping")
         
     try:
         await betano.run()
     except Exception:
         logging.exception("Betano")
+    logging.info("Betano finished scraping")
   
     await browser.stop()
+    logging.info("Scraping Done.")
 
 if __name__ == "__main__":
     asyncio.run(main())

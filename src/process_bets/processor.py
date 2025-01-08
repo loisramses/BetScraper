@@ -1,5 +1,6 @@
 import itertools
 import requests
+import logging
 import json
 import os
 import re
@@ -55,9 +56,9 @@ def insert_data(conn: sqlite3.Connection):
                                         elif re.search('não', option_name, re.IGNORECASE):
                                             option_type = OptionTypes.NO.value
                                             option_name = "Não"
-                                        elif participant1 == option_name or fuzz.token_ratio(participant1, option_name, processor=default_process) > 75:
+                                        elif participant1 == option_name or fuzz.token_ratio(participant1, option_name, processor=default_process) > 80:
                                             option_type = OptionTypes.PART1.value
-                                        elif participant2 == option_name or fuzz.token_ratio(participant2, option_name, processor=default_process) > 75:
+                                        elif participant2 == option_name or fuzz.token_ratio(participant2, option_name, processor=default_process) > 80:
                                             option_type = OptionTypes.PART2.value
                                         option_id = insert_option(cursor, option_name, selection[1], get_option_type_by_option_type(cursor, option_type), bet_id, arg)
                     conn.commit()
@@ -75,7 +76,7 @@ def build_pairs(conn: sqlite3.Connection):
             insert_pair(cursor, id_a, id_b, ratio)
     conn.commit()
 
-def build_oportunities(conn: sqlite3.Connection):
+def build_opportunities(conn: sqlite3.Connection):
     cursor = conn.cursor()
     all_pairs = get_all_pairs(cursor, "id, match1_id, match2_id")
     for pair in all_pairs:
@@ -101,14 +102,23 @@ def send_message(oportunity):
     match_name, url1, url2, bet_type, option1, odd1, option2, odd2, advantage, trust_factor = oportunity
     bot_token = os.getenv("BOT_TOKEN")
     chat_id = os.getenv("CHAT_ID")
+    
+    match_name = match_name.replace('(', '\\(').replace(')', '\\)')
+    option1 = option1.replace('(', '\\(').replace(')', '\\)')
+    odd1 = str(odd1).replace('.', '\\.')
+    option2 = option2.replace('(', '\\(').replace(')', '\\)')
+    odd2 = str(odd2).replace('.', '\\.')
+    advantage = str(advantage).replace('.', '\\.')
+    trust_factor = str(trust_factor).replace('.', '\\.')
+    
     message = f"""
     *Oportunidade*
-    *{match_name.replace('(', '\\(').replace(')', '\\)')}*
+    *{match_name}*
     *Tipo de aposta:* {bet_type}
-    *1ª opção:* [{option1.replace('(', '\\(').replace(')', '\\)')}]({url1}) *Odd:* {str(odd1).replace('.', '\\.')}
-    *2ª opção:* [{option2.replace('(', '\\(').replace(')', '\\)')}]({url2}) *Odd:* {str(odd2).replace('.', '\\.')}
-    *Percentagem:* {str(advantage).replace('.', '\\.')}
-    *Taxa de confiança:* {str(trust_factor).replace('.', '\\.')}
+    *1ª opção:* [{option1}]({url1}) *Odd:* {odd1}
+    *2ª opção:* [{option2}]({url2}) *Odd:* {odd2}
+    *Percentagem:* {advantage}
+    *Taxa de confiança:* {trust_factor}
     """
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {"chat_id": chat_id, "text": message, "parse_mode": "MarkdownV2", "link_preview_options": {"is_disabled": True}}
@@ -123,10 +133,16 @@ def expose_bets(conn: sqlite3.Connection):
         send_message(oportunity)
 
 conn = get_connection('../database.db')
+logging.basicConfig(filename="logs/log.log", filemode='a', format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 init_db(conn)
 clean_up_db(conn)
+logging.info("Inserting data into DB")
 insert_data(conn)
+logging.info("Building pairs")
 build_pairs(conn)
-build_oportunities(conn)
+logging.info("Building opportunities")
+build_opportunities(conn)
+logging.info("Exposing Bets")
 expose_bets(conn)
 close_connection(conn)
+logging.info("Processing Done!")
