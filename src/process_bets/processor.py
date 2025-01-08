@@ -104,13 +104,13 @@ def send_message(oportunity):
     chat_id = os.getenv("CHAT_ID")
     print(bot_token)
     print(chat_id)
-    match_name = match_name.replace('(', '\(').replace(')', '\)')
-    option1 = option1.replace('(', '\(').replace(')', '\)')
-    odd1 = str(odd1).replace('.', '\.')
-    option2 = option2.replace('(', '\(').replace(')', '\)')
-    odd2 = str(odd2).replace('.', '\.')
-    advantage = str(advantage).replace('.', '\.')
-    trust_factor = str(trust_factor).replace('.', '\.')
+    match_name = match_name.replace('(', '\\(').replace(')', '\\)')
+    option1 = option1.replace('(', '\\(').replace(')', '\\)').replace('.', '\\.')
+    odd1 = str(odd1).replace('.', '\\.')
+    option2 = option2.replace('(', '\\(').replace(')', '\\)').replace('.', '\\.')
+    odd2 = str(odd2).replace('.', '\\.')
+    advantage = str(advantage).replace('.', '\\.')
+    trust_factor = str(trust_factor).replace('.', '\\.')
     
     message = f"""
     *Oportunidade*
