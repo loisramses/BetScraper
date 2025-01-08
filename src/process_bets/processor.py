@@ -103,12 +103,12 @@ def send_message(oportunity):
     chat_id = os.getenv("CHAT_ID")
     message = f"""
     *Oportunidade*
-    *{match_name.replace("(", "\\(").replace(")", "\\)")}*
+    *{match_name.replace('(', '\\(').replace(')', '\\)')}*
     *Tipo de aposta:* {bet_type}
-    *1ª opção:* [{option1.replace("(", "\\(").replace(")", "\\)")}]({url1}) *Odd:* {str(odd1).replace(".", "\\.")}
-    *2ª opção:* [{option2.replace("(", "\\(").replace(")", "\\)")}]({url2}) *Odd:* {str(odd2).replace(".", "\\.")}
-    *Percentagem:* {str(advantage).replace(".", "\\.")}
-    *Taxa de confiança:* {str(trust_factor).replace(".", "\\.")}
+    *1ª opção:* [{option1.replace('(', '\\(').replace(')', '\\)')}]({url1}) *Odd:* {str(odd1).replace('.', '\\.')}
+    *2ª opção:* [{option2.replace('(', '\\(').replace(')', '\\)')}]({url2}) *Odd:* {str(odd2).replace('.', '\\.')}
+    *Percentagem:* {str(advantage).replace('.', '\\.')}
+    *Taxa de confiança:* {str(trust_factor).replace('.', '\\.')}
     """
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {"chat_id": chat_id, "text": message, "parse_mode": "MarkdownV2", "link_preview_options": {"is_disabled": True}}
