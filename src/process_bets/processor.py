@@ -36,7 +36,7 @@ def insert_data(conn: sqlite3.Connection):
                                 continue
                             participant1 = parts[0].strip()
                             participant2 = parts[1].strip()
-                            match_id = insert_match(cursor, match_name, participant1, participant2, match_data['url'], sport_id, bookmaker_id)
+                            match_id = insert_match(cursor, match_name, participant1, participant2, match_data['url'], match_data['event_time'], sport_id, bookmaker_id)
                             for bet_type, bet_selections in match_data['bets']:
                                 if bet_type in bet_type_mapping:
                                     bet_id = insert_bet(cursor, match_id, get_bet_type_by_bet_type(cursor, bet_type_mapping[bet_type].value))
@@ -65,14 +65,14 @@ def insert_data(conn: sqlite3.Connection):
 
 def build_pairs(conn: sqlite3.Connection):
     cursor = conn.cursor()
-    all_matches = get_all_matches(cursor, "id, name, participant1, participant2, sport_id, bookmaker_id")
+    all_matches = get_all_matches(cursor, "id, name, participant1, participant2, start_time, sport_id, bookmaker_id")
     for a, b in itertools.combinations(all_matches, 2):
-        id_a, match_name_a, part1_a, part2_a, sport_id_a, bookmaker_id_a = a
-        id_b, match_name_b, part1_b, part2_b, sport_id_b, bookmaker_id_b = b
+        id_a, match_name_a, part1_a, part2_a, start_time_a, sport_id_a, bookmaker_id_a = a
+        id_b, match_name_b, part1_b, part2_b, start_time_b,  sport_id_b, bookmaker_id_b = b
         sort_ratio = fuzz.ratio(match_name_a, match_name_b)
         parts_ratio = (fuzz.token_ratio(part1_a, part1_b) + fuzz.token_ratio(part2_a, part2_b)) / 2
         ratio = (parts_ratio + sort_ratio) / 2
-        if ratio >= 70 and sport_id_a == sport_id_b and bookmaker_id_a != bookmaker_id_b:
+        if ratio >= 70 and start_time_a == start_time_b and sport_id_a == sport_id_b and bookmaker_id_a != bookmaker_id_b:
             insert_pair(cursor, id_a, id_b, ratio)
     conn.commit()
 

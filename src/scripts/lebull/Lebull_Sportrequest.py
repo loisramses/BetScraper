@@ -1,7 +1,7 @@
 import zendriver
 import asyncio
 import json
-from utils.helper import request_data
+from utils.helper import request_data, from_long_to_date
 from utils.maps import allowed_sports
 from collections import defaultdict
 
@@ -31,6 +31,7 @@ class Lebull_Request:
                     else:
                         match_name = f"{game['teamA']} : {game['teamB']}"
                     # match_name = f"{game['teamA']} : {game['teamB']}"
+                    event_time = from_long_to_date(game['timestamp']/1000)
                     match_url = f"https://www.lebull.pt/pt/sportsbook?page=/event/{game['eventId']}"
                     bets = []
                     for bet in game['stakeTypes']:
@@ -44,6 +45,7 @@ class Lebull_Request:
                             options.append((option_name, option_odd))
                         bets.append((bet_name, options))
                     event[match_name] = defaultdict(lambda: defaultdict(list))
+                    event[match_name]['event_time'] = event_time
                     event[match_name]['url'] = match_url
                     event[match_name]['bets'] = bets
                     sport[sport_name][league_name].append(event)

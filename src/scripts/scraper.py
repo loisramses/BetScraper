@@ -8,7 +8,7 @@ from bwin.Bwin_Sportrequest import Bwin_Request
 
 async def main():
     logging.basicConfig(filename="logs/log.log", filemode='a', format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
-    browser = await zd.start(browser_executable_path="/usr/bin/chromium", headless=True)
+    browser = await zd.start(browser_executable_path="/snap/bin/chromium", headless=True)
     page = await browser.get('about:blank')
     
     casino = CasinoPT_Request(page)

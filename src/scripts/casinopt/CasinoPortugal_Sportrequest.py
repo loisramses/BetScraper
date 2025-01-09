@@ -51,6 +51,7 @@ class CasinoPT_Request():
             league_name = entry['comp_name']
             event = defaultdict(lambda: defaultdict(list))
             match_name = entry['name'].replace('vs.', ':')
+            event_time = entry['start_time_utc']
             match_url = f"{self.event_base_url}{entry['id']}"
             bets = []
             for bet in entry['markets']:
@@ -64,6 +65,7 @@ class CasinoPT_Request():
                 bets.append((bet_name, options))
 
             event[match_name] = defaultdict(lambda: defaultdict(list))
+            event[match_name]['event_time'] = event_time
             event[match_name]['url'] = match_url
             event[match_name]['bets'] = bets
             sports[sport_name][league_name].append(event)

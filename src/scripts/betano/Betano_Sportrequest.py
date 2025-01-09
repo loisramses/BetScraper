@@ -1,7 +1,7 @@
 import zendriver
 import asyncio
 import json
-from utils.helper import request_data
+from utils.helper import request_data, from_long_to_date
 from collections import defaultdict
 
 class Betano_Request:
@@ -16,6 +16,7 @@ class Betano_Request:
             data = await request_data(f"{self.base_api_url}{event['url']}", {'method': 'GET'}, self.page)
             bets = []
             event_name = event['name'].replace(' - ', ' : ')
+            event_time  = from_long_to_date(event['startTime']/1000)
             event_url = f"{self.base_url}{event['url']}"
             try: # avoid live events
                 
@@ -38,6 +39,7 @@ class Betano_Request:
             
             event = defaultdict(lambda: defaultdict(list))
             event[event_name] = {
+                'event_time': event_time,
                 'url': event_url,
                 'bets': bets
             }

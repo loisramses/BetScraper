@@ -61,6 +61,7 @@ def init_db(conn: sqlite3.Connection):
         participant1 TEXT NOT NULL,
         participant2 TEXT NOT NULL,
         url TEXT UNIQUE NOT NULL,
+        start_time DATE NOT NULL,
         sport_id INTEGER NOT NULL,
         bookmaker_id INTEGER NOT NULL,
         FOREIGN KEY (sport_id) REFERENCES sports (id)
@@ -174,12 +175,12 @@ def clean_up_db(conn: sqlite3.Connection):
 #     """, (league_name, sport_id))
 #     return cursor.fetchone()[0]
 
-def insert_match(cursor: sqlite3.Cursor, match_name: str, participant1: str, participant2: str, url: str, sport_id: int, bookmaker_id: int) -> int | None:
+def insert_match(cursor: sqlite3.Cursor, match_name: str, participant1: str, participant2: str, url: str, start_time: str, sport_id: int, bookmaker_id: int) -> int | None:
     cursor.execute("""
-    INSERT INTO matches (name, participant1, participant2, url, sport_id, bookmaker_id)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO matches (name, participant1, participant2, url, start_time, sport_id, bookmaker_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     RETURNING *;
-    """, (match_name, participant1, participant2, url, sport_id, bookmaker_id))
+    """, (match_name, participant1, participant2, url, start_time, sport_id, bookmaker_id))
     return cursor.fetchone()[0]
 
 def insert_pair(cursor: sqlite3.Cursor, match1_id: int, match2_id: int, trust_factor: float) -> int | None:

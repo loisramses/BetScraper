@@ -18,7 +18,7 @@ class Bwin_Request:
         time_interval = self.format_date(current_date + timedelta(days=4))
         current_date = self.format_date(current_date)
         ids_string = ",".join(str(sport[1]) for sport in sports_list)
-        quantity = 2000
+        quantity = 3000
         
         data = await request_data(f'https://sports.bwin.pt/cds-api/bettingoffer/fixtures?x-bwin-accessid=YmQwNTFkNDAtNzM3Yi00YWIyLThkNDYtYWFmNGY2N2Y1OWIx&lang=pt&country=PT&sportIds={ids_string}&take={quantity}&sortBy=FixtureStage&from={current_date}&to={time_interval}&offerMapping=All',
                                 {'method': 'GET',
@@ -32,6 +32,7 @@ class Bwin_Request:
             league_name = entry['competition']['name']['value']
 
             event = defaultdict(lambda: defaultdict(list))
+            event_time = datetime.strptime(entry['startDate'], "%Y-%m-%dT%H:%M:%SZ").strftime('%Y-%m-%d %H:%M:%S')
             match_name = entry['name']['value'].replace(' - ', ' : ')
             event_name_url = '-'.join(re.sub(pattern, '', match_name.lower()).split())
             match_url = f"{self.event_base_url}{event_name_url}-{entry['id']}/?market=-1"
@@ -53,6 +54,7 @@ class Bwin_Request:
                     options.append((option_name, option_odd))
                 bets.append((bet_name, options))
             event[match_name] = defaultdict(lambda: defaultdict(list))
+            event[match_name]['event_time'] = event_time
             event[match_name]['url'] = match_url
             event[match_name]['bets'] = bets
             sports[sport_name][league_name].append(event)
