@@ -322,7 +322,7 @@ def get_oportunities_for_export(cursor: sqlite3.Cursor) -> list | None:
     JOIN pairs p ON o.pair_id = p.id
     JOIN matches m1 ON p.match1_id = m1.id
     JOIN matches m2 ON p.match2_id = m2.id
-    WHERE o.advantage > 0 AND o.advantage < 15 AND p.trust_factor > 80;
+    WHERE o.advantage > 0 AND p.trust_factor > 80;
     """)
     result = cursor.fetchall()
     return result if result else None
