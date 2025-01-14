@@ -1,5 +1,5 @@
 chromium --headless &
-sleep 10
+sleep 5
 pkill -x "chromium"
 sleep 5
 
