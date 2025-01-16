@@ -179,6 +179,7 @@ def insert_match(cursor: sqlite3.Cursor, match_name: str, participant1: str, par
     cursor.execute("""
     INSERT INTO matches (name, participant1, participant2, url, start_time, sport_id, bookmaker_id)
     VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT (url) DO UPDATE SET url = url
     RETURNING *;
     """, (match_name, participant1, participant2, url, start_time, sport_id, bookmaker_id))
     return cursor.fetchone()[0]

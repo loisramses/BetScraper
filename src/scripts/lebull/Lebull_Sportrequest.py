@@ -17,38 +17,44 @@ class Lebull_Request:
 
     async def get_events_data(self, id: str, semaphore: asyncio.Semaphore):
         async with semaphore:
-            data = await request_data(f'https://sportsbook-betting-prod.gtdevteam.work/sports/{id}/leagues/upcoming?leagueTimeFilter=10&languageId=14&isStakeGrouped=true&checkIsActive=true', self.request_options, self.page)
             sport = defaultdict(lambda: defaultdict(list))
-            if not data:
-                return sport
-            for league in data:
-                sport_name = league['sportName']
-                league_name = league['leagueName']
-                for game in league['games']:
-                    event = defaultdict(lambda: defaultdict(list))
-                    if (sport_name == allowed_sports[1] or sport_name == allowed_sports[4]) and game['eventComment'] == 'Equipa Casa - Equipa Visitante':
-                        match_name = f"{game['teamB']} : {game['teamA']}"
-                    else:
-                        match_name = f"{game['teamA']} : {game['teamB']}"
-                    # match_name = f"{game['teamA']} : {game['teamB']}"
-                    event_time = from_long_to_date(game['timestamp']/1000)
-                    match_url = f"https://www.lebull.pt/pt/sportsbook?page=/event/{game['eventId']}"
-                    bets = []
-                    for bet in game['stakeTypes']:
-                        bet_name = bet['stakeTypeName']
-                        options = []
-                        for option in bet['stakes']:
-                            option_name = option['stakeName']
-                            if option['stakeArgument']:
-                                option_name += f" {str(option['stakeArgument'])}"
-                            option_odd = option['betFactor']
-                            options.append((option_name, option_odd))
-                        bets.append((bet_name, options))
-                    event[match_name] = defaultdict(lambda: defaultdict(list))
-                    event[match_name]['event_time'] = event_time
-                    event[match_name]['url'] = match_url
-                    event[match_name]['bets'] = bets
-                    sport[sport_name][league_name].append(event)
+            league_time_filter_ids = [10, 14]
+            
+            for time_filter_id in league_time_filter_ids:                
+                data = await request_data(f'https://sportsbook-betting-prod.gtdevteam.work/sports/{id}/leagues/upcoming?leagueTimeFilter={time_filter_id}&languageId=14&isStakeGrouped=true&checkIsActive=true',
+                                          self.request_options,
+                                          self.page)
+                if not data:
+                    continue
+                
+                for league in data:
+                    sport_name = league['sportName']
+                    league_name = league['leagueName']
+                    for game in league['games']:
+                        event = defaultdict(lambda: defaultdict(list))
+                        if (sport_name == allowed_sports[1] or sport_name == allowed_sports[4]) and game['eventComment'] == 'Equipa Casa - Equipa Visitante':
+                            match_name = f"{game['teamB']} : {game['teamA']}"
+                        else:
+                            match_name = f"{game['teamA']} : {game['teamB']}"
+                        # match_name = f"{game['teamA']} : {game['teamB']}"
+                        event_time = from_long_to_date(game['timestamp']/1000)
+                        match_url = f"https://www.lebull.pt/pt/sportsbook?page=/event/{game['eventId']}"
+                        bets = []
+                        for bet in game['stakeTypes']:
+                            bet_name = bet['stakeTypeName']
+                            options = []
+                            for option in bet['stakes']:
+                                option_name = option['stakeName']
+                                if option['stakeArgument']:
+                                    option_name += f" {str(option['stakeArgument'])}"
+                                option_odd = option['betFactor']
+                                options.append((option_name, option_odd))
+                            bets.append((bet_name, options))
+                        event[match_name] = defaultdict(lambda: defaultdict(list))
+                        event[match_name]['event_time'] = event_time
+                        event[match_name]['url'] = match_url
+                        event[match_name]['bets'] = bets
+                        sport[sport_name][league_name].append(event)
             return sport
 
     async def get_all_data(self):
