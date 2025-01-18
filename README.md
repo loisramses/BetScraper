@@ -1,68 +1,73 @@
-#Betting Odds Scraper & Advantage Betting Notifier
+# Betting Odds Scraper & Advantage Betting Notifier
 
-##Overview
+## Overview
 
 This project is a web scraping system that collects odds from four Portuguese betting websites, compares them, and identifies advantage betting opportunities. The detected opportunities are then sent to a Telegram channel, where users receive real-time notifications.
 
-##Features
+## Features
 
--Scrapes odds from four betting websites
+- Scrapes odds from four betting websites
 
--Compares odds to detect value betting opportunities
+- Compares odds to detect value betting opportunities
 
--Automated notifications sent to a Telegram channel
+- Automated notifications sent to a Telegram channel
 
--Optimized data processing for efficiency and reliability
+- Optimized data processing for efficiency and reliability
 
-##Technologies Used
+## Technologies Used
 
--Python (Core development)
+- **Python** (Core development)
 
--Nodriver (Scraping)
+- **Nodriver** (Scraping)
 
--Telegram API (Notification system)
+- **Telegram API** (Notification system)
 
--SQLite (Data storage)
+- **SQLite** (Data storage)
 
--AsyncIO (Asynchronous requests for efficiency)
+- **AsyncIO** (Asynchronous requests for efficiency)
 
-##Installation & Setup
+## Installation & Setup
 
-###Clone this repository:
-
+### Clone this repository:
+```bash
     git clone https://github.com/loisramses/BetScraper.git
     cd BetScraper
+```
 
-###Install dependencies:
-
+### Install dependencies:
+```bash
     pip install zendriver requests rapidfuzz
+```
 
-
-###Configure environment variables for Telegram bot:
-
+### Configure environment variables for Telegram bot:
+```bash
     export TELEGRAM_BOT_TOKEN="your_token_here"
     export TELEGRAM_CHAT_ID="your_chat_id_here"
+```
 
-###Run the scraper:
-
+### Run the scraper:
+```bash
     bash start.sh
+```
 
-##Usage
+## Usage
 
-###To run periodically, create a crontab:
-
+### To run periodically, create a crontab:
+```bash
     crontab -e
+```
 
-###And then, at the end of the file:
-
+### And then, at the end of the file:
+```bash
     */<minute_interval> * * * * /path/to/your/folder/BetScraper.sh
+```
 
 If an advantage betting opportunity is found, it is sent to the configured Telegram channel.
 
-##Future Improvements
+## Future Improvements
 
 Expand to more betting websites.
 
-##License
+## License
 
 This project is for personal and educational purposes. Use at your own discretion.
