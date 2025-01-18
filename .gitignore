@@ -2,6 +2,7 @@
 logs
 venv
 .vscode
+start.sh
 src/output
 chat_id.txt
 bot_token.txt
