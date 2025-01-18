@@ -36,7 +36,11 @@ This project is a web scraping system that collects odds from four Portuguese be
 
 ### Install dependencies:
 ```bash
+    python -m venv venv
+    source venv/bin/activate
     pip install zendriver requests rapidfuzz
+    mkdir src/logs
+    mkdir src/ouput
 ```
 
 ### Configure environment variables for Telegram bot:
