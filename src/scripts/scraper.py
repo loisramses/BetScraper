@@ -6,6 +6,16 @@ from lebull.Lebull_Sportrequest import Lebull_Request
 from betano.Betano_Sportrequest import Betano_Request
 from bwin.Bwin_Sportrequest import Bwin_Request
 
+async def retry(task, name, retries=3):
+    for attempt in range(retries):
+        try:
+            await task()
+            logging.info(f"{name} finished scraping")
+            return
+        except Exception:
+            logging.exception(f"{name} attempt {attempt + 1} failed")
+    logging.error(f"{name} failed after {retries} attempts")
+
 async def main():
     logging.basicConfig(filename="logs/log.log", filemode='a', format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
     browser = await zd.start(browser_executable_path="/snap/bin/chromium", headless=True)
@@ -16,29 +26,10 @@ async def main():
     lebull = Lebull_Request(page)
     bwin = Bwin_Request(page)
 
-    try:
-        await lebull.run()
-    except Exception:
-        logging.exception("Lebull")
-    logging.info("Lebull finished scraping")
-        
-    try:
-        await casino.run()
-    except Exception:
-        logging.exception("Casino")
-    logging.info("CasinoPT finished scraping")
-        
-    try:
-        await bwin.run()
-    except Exception:
-        logging.exception("Bwin")
-    logging.info("Bwin finished scraping")
-        
-    try:
-        await betano.run()
-    except Exception:
-        logging.exception("Betano")
-    logging.info("Betano finished scraping")
+    await retry(lebull.run, "Lebull")
+    await retry(casino.run, "Casino")
+    await retry(bwin.run, "Bwin")
+    await retry(betano.run, "Betano")
   
     await browser.stop()
     logging.info("Scraping Done.")
