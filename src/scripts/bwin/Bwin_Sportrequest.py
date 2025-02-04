@@ -18,7 +18,7 @@ class Bwin_Request:
         time_interval = self.format_date(current_date + timedelta(days=7))
         current_date = self.format_date(current_date)
         ids_string = ",".join(str(sport[1]) for sport in sports_list)
-        quantity = 4000
+        quantity = 3000
         
         data = await request_data(f'https://sports.bwin.pt/cds-api/bettingoffer/fixtures?x-bwin-accessid=YmQwNTFkNDAtNzM3Yi00YWIyLThkNDYtYWFmNGY2N2Y1OWIx&lang=pt&country=PT&sportIds={ids_string}&take={quantity}&sortBy=FixtureStage&from={current_date}&to={time_interval}&offerMapping=All',
                                 {'method': 'GET',

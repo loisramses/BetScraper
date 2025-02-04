@@ -56,9 +56,9 @@ def insert_data(conn: sqlite3.Connection):
                                         elif re.search('não', option_name, re.IGNORECASE):
                                             option_type = OptionTypes.NO.value
                                             option_name = "Não"
-                                        elif participant1 == option_name or fuzz.token_ratio(participant1, option_name, processor=default_process) > 80:
+                                        elif participant1 == option_name or fuzz.token_ratio(participant1, option_name, processor=default_process) > 85:
                                             option_type = OptionTypes.PART1.value
-                                        elif participant2 == option_name or fuzz.token_ratio(participant2, option_name, processor=default_process) > 80:
+                                        elif participant2 == option_name or fuzz.token_ratio(participant2, option_name, processor=default_process) > 85:
                                             option_type = OptionTypes.PART2.value
                                         option_id = insert_option(cursor, option_name, selection[1], get_option_type_by_option_type(cursor, option_type), bet_id, arg)
                     conn.commit()
@@ -102,8 +102,6 @@ def send_message(oportunity):
     match_name, url1, url2, bet_type, option1, odd1, option2, odd2, advantage, trust_factor = oportunity
     bot_token = os.getenv("BOT_TOKEN")
     chat_id = os.getenv("CHAT_ID")
-    print(bot_token)
-    print(chat_id)
     match_name = match_name.replace('(', '\\(').replace(')', '\\)')
     option1 = option1.replace('(', '\\(').replace(')', '\\)').replace('.', '\\.')
     odd1 = str(odd1).replace('.', '\\.')
@@ -121,11 +119,13 @@ def send_message(oportunity):
     *Percentagem:* {advantage}
     *Taxa de confiança:* {trust_factor}
     """
+    # print(message)
+    logging.info(message)
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {"chat_id": chat_id, "text": message, "parse_mode": "MarkdownV2", "link_preview_options": {"is_disabled": True}}
     response = requests.post(url, json=payload)
-    print(oportunity)
-    print(response._content)
+    logging.info(response._content)
+    # print(response._content)
 
 def expose_bets(conn: sqlite3.Connection):
     cursor = conn.cursor()

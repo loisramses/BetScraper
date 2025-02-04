@@ -55,6 +55,7 @@ class CasinoPT_Request():
             match_url = f"{self.event_base_url}{entry['id']}"
             bets = []
             for bet in entry['markets']:
+                if bet['trading_status'] == 'Suspended': continue
                 variables = dict(item.split('=') for item in bet['specifiers'].split('&')) if bet['specifiers'] else {}
                 bet_name = self.get_competitor_name(bet['name_pt'], entry) if not variables else self.process_str(self.get_competitor_name(bet['name_pt'], entry), variables)
                 options = []
