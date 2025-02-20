@@ -6,7 +6,7 @@ from lebull.Lebull_Sportrequest import Lebull_Request
 from betano.Betano_Sportrequest import Betano_Request
 from bwin.Bwin_Sportrequest import Bwin_Request
 
-async def retry(task, name, retries=3):
+async def retry(task, name, retries=2):
     for attempt in range(retries):
         try:
             await task()

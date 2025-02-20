@@ -1,6 +1,6 @@
 import enum
 
-class BetTypes(enum.Enum):
+class BetType(enum.Enum):
     WINNER = 'Vencedor' # TÉNIS, BASQUETEBOL, FUTEBOL AMERICANO, VOLEIBOL
     BOTH_TEAMS_SCORE = 'Ambas as Equipas Marcam' # FUTEBOL
     BOTH_PLAYERS_WIN_A_SET = 'Ambos os Jogadores Ganharão 1 Set' # TÉNIS
@@ -13,7 +13,7 @@ class BetTypes(enum.Enum):
     # SE VALE A PENA VER ENTRE TODAS AS CASAS DE APOSTAS
     # EMPATE ANULA TAMBÉM É BOM
     
-class OptionTypes(enum.Enum):
+class OptionType(enum.Enum):
     MORE = 'Mais de'
     LESS = 'Menos de'
     YES = 'Sim'
