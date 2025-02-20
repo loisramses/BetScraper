@@ -8,7 +8,7 @@ This project is a web scraping system that collects odds from four Portuguese be
 
 - Scrapes odds from four betting websites
 
-- Compares odds to detect value betting opportunities
+- Compares odds to detect value betting and middle betting opportunities
 
 - Automated notifications sent to a Telegram channel
 
